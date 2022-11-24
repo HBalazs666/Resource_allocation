@@ -130,4 +130,4 @@ def dijkstra(graph, fog_num, starting_point):
         checked = result[1]
         distances = result[2]
 
-    print(distances)
+    return distances

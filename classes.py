@@ -37,23 +37,20 @@ class Individual:
 
 class Node:
 
-    def __init__(self, CPU, RAM):
-        self.CPU = CPU
+    def __init__(self, MIPS, RAM, VM_quantity, network_latency):
+        self.MIPS = MIPS
         self.RAM = RAM
-        self.latency = 0
-        self.fog = False
-
-    
-    def __str__(self):
-
-        return 'Fitness: ' + str(self.fitness)
+        self.network_latency = network_latency
+        self.VM_quantity = VM_quantity
+        self.MIPS_per_VM = int(MIPS/VM_quantity)
 
 
 class Microservice:
 
-    def __init__(self, CPU_req, RAM_req):
-        self.CPU_req = CPU_req
-        self.RAM_req = RAM_req
+    def __init__(self, MIPS_ms, RAM_ms, index):
+        self.CPU_req = MIPS_ms
+        self.RAM_req = RAM_ms
+        self.index = index
         
 
 class Service:
