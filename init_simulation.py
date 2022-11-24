@@ -70,5 +70,19 @@ def init_nodes(fog_num, network_latencies, parameters):
     return nodes
 
 
-def init_matrice(nodes, ms_list):
-    pass
+def init_matrix(nodes, ms_list):
+    
+    VM_sum = 0
+    MS_sum = len(ms_list)
+
+    for node in range(len(nodes)):
+        VM_sum = VM_sum + nodes[node].VM_quantity
+
+    matrix=[] #define empty matrix
+    for i in range(VM_sum): #total row is 3 (VM-ek)
+        row=[] #Credits for Hassan Tariq for noticing it missing
+        for j in range(MS_sum): #total column is 3 (MS-ek//gének)
+            row.append(0) #adding 0 value for each column for this row
+        matrix.append(row) #add fully defined column into the row
+
+    return matrix
