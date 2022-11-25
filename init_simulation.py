@@ -43,7 +43,7 @@ def init_nodes(fog_num, network_latencies, parameters):
             MIPS = random.randint(parameters[0][0], parameters[0][1])
             RAM = random.randint(parameters[1][0], parameters[1][1])
             VM_quantity = parameters[2]
-            cloud_server = Node(MIPS, RAM, VM_quantity, network_latencies[node])
+            cloud_server = Node(MIPS, RAM, VM_quantity, network_latencies[node], node)
 
             nodes.append(cloud_server)
 
@@ -51,7 +51,7 @@ def init_nodes(fog_num, network_latencies, parameters):
             MIPS = random.randint(parameters[3][0], parameters[3][1])
             RAM = random.randint(parameters[4][0], parameters[4][1])
             VM_quantity = parameters[5]
-            fog_server = Node(MIPS, RAM, VM_quantity, network_latencies[node])
+            fog_server = Node(MIPS, RAM, VM_quantity, network_latencies[node], node)
 
             nodes.append(fog_server)
 
@@ -59,7 +59,7 @@ def init_nodes(fog_num, network_latencies, parameters):
             MIPS = random.randint(parameters[6][0], parameters[6][1])
             RAM = random.randint(parameters[7][0], parameters[7][1])
             VM_quantity = parameters[8]
-            edge_server = Node(MIPS, RAM, VM_quantity, network_latencies[node])
+            edge_server = Node(MIPS, RAM, VM_quantity, network_latencies[node], node)
 
             nodes.append(edge_server)
 
