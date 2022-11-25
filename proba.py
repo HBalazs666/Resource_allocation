@@ -55,3 +55,5 @@ matrix = init_matrix(nodes, ms_list)
 print(matrix)
 
 # genetic_solution = genetic_algorithm(matrix, nodes, ms_list)
+
+# krumpli
