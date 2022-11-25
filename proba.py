@@ -56,5 +56,3 @@ matrix = init_matrix(nodes, ms_list)
 
 # az optimalizált eredmény mátrixa TODO
 genetic_solution = genetic_algorithm(matrix, nodes, ms_list)
-
-genetic_solution = genetic_algorithm(matrix, nodes, ms_list)
