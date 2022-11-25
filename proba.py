@@ -56,4 +56,4 @@ print(matrix)
 
 # genetic_solution = genetic_algorithm(matrix, nodes, ms_list)
 
-# krumpli
+# krumpl
