@@ -37,13 +37,14 @@ class Individual:
 
 class Node:
 
-    def __init__(self, MIPS, RAM, VM_quantity, network_latency):
+    def __init__(self, MIPS, RAM, VM_quantity, network_latency, index):
         self.MIPS = MIPS
         self.RAM = RAM
         self.network_latency = network_latency
         self.VM_quantity = VM_quantity
         self.MIPS_per_VM = int(MIPS/VM_quantity)
         self.RAM_per_VM = int(MIPS/RAM)
+        self.index = index
 
 
 class Microservice:
