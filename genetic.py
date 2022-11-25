@@ -35,7 +35,7 @@ def node_finder(VM, nodes):
 
 def latency_calculator(ms, containing_node):
 
-    latency = containing_node.network_latency + ((ms.CPU_req / containing_node.MIPS_per_VM) / 1000)
+    latency = ((ms.CPU_req / containing_node.MIPS_per_VM) / 1000)
 
     return latency
 
@@ -95,15 +95,19 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
     # ha nincs ütközés a kikötések mentén, akkor normál módon
     # számolandó a késleltetés, ami megegyezik a fitness-értékkel is
     service_latencies = []
-    latencies_by_ms = []
+    latencies_by_VMs = []
 
     # a service_latencies számításához minden ms késleltetését
     # ismerni kell servicekhez rendelve
     for service in range(service_num):
 
-        latencies_by_ms.append([])
+        latencies_by_VMs.append([])
 
     for VM in range(len(matrix_of_individual)):
+
+        latency_of_VM = 0
+        latency_of_network = 0
+        service_number = -1
 
         for ms in range(len(ms_list)):
 
@@ -118,23 +122,25 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
 
                 # kiderítjük melyik node-hoz tartozik
                 containing_node = node_finder(VM)
+                latency_of_network = containing_node.network_latency
 
                 # a paraméterek alapján kiszámoljuk
-                # a késleltetést
-                latency = latency_calculator(actual_ms, containing_node)
+                # a késleltetést a csomóponton, minden ms additív tag
+                latency_of_VM = latency_of_VM + latency_calculator(actual_ms, containing_node)
 
-                # hozzáfűzzük a megfelelő listához
-                latencies_by_ms[service_number].append(latency)
+        # ezek alapján egy service késleltetése az általa használt
+        # legnagyobb késleltetésű VM késleltetésének felel meg
+        if latency_of_VM != 0:
 
-                # ezek alapján a késleltetés servicenként a legnagyobb
-                # késleltetésű ms-nek felel meg
-                for service in range(service_num):
-                    service_latencies.append(max(latencies_by_ms[service]))
+            total_latency = latency_of_network + latency_of_VM
+            latencies_by_VMs[service_number].append(total_latency)
+
+    for service in range(service_num):
+
+        service_latencies.append(max(latencies_by_VMs[service]))
 
     return sum(service_latencies)
                     
-
-
 
 # kiválasztjuk a legjobb egyedeket az implementált szabály alapján
 def select(ordered_fitness_list):
