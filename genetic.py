@@ -10,7 +10,7 @@ def init_first(matrix, population_size):
 
         for VM in range(len(matrix)):
             for MS in range(len(matrix[VM])):
-                matrix[VM][MS] = random.randint(0, 1)
+                matrix[VM][MS] = random.randint(0, 1)  # TODO: ezt itt le kell cserélni
         
         init_population.append(matrix)
 
@@ -28,14 +28,15 @@ def node_finder(VM, nodes):
 
             return node
         
-        first_VM_of_node = node.VM_quantity
+        first_VM_of_node = first_VM_of_node + node.VM_quantity
 
     return -1
 
 
 def latency_calculator(ms, containing_node):
 
-    latency = ((ms.CPU_req / containing_node.MIPS_per_VM) / 1000)
+    # milliszekundumban
+    latency = ((ms.CPU_req / containing_node.MIPS_per_VM) * 1000)
 
     return latency
 
@@ -56,29 +57,26 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
 
             # ha ez igaz, akkor egyazon VM-en több service MS-e is fut,
             # ami nem megengedett
-            if sum > 0:
-                if sum != sum(matrix_of_individual[VM]):
-
-                    return 99999
-    
-    # az egyes node-ok kapacitásait nem lehet meghaladni
-    actual_VM = 0
-    for node in nodes:
-
-        for VM in range(node.VM_quantity):
-
-            VM_MIPS_assumed = 0
-            VM_RAM_assumed = 0
-
-            for ms in range(len(matrix_of_individual[actual_VM])):
-                if matrix_of_individual[actual_VM][ms] == 1:
-
-                    VM_MIPS_assumed = VM_MIPS_assumed + ms_list[ms].CPU_req
-                    VM_RAM_assumed = VM_RAM_assumed + ms_list[ms].RAM_req
-
-            if VM_MIPS_assumed > node.MIPS_per_VM or VM_RAM_assumed > node.RAM_per_VM:
-
+            if sum > 0 and sum != sum(matrix_of_individual[VM]):
                 return 99999
+    
+    # az egyes VM-ek kapacitásait nem lehet meghaladni
+    for VM in range(len(matrix_of_individual)):
+
+        VM_MIPS_assumed = 0
+        VM_RAM_assumed = 0
+
+        node = node_finder(VM, nodes)
+
+        for ms in range(len(matrix_of_individual[VM])):
+            if matrix_of_individual[VM][ms] == 1:
+
+                VM_MIPS_assumed = VM_MIPS_assumed + ms_list[ms].CPU_req
+                VM_RAM_assumed = VM_RAM_assumed + ms_list[ms].RAM_req
+
+        if VM_MIPS_assumed > node.MIPS_per_VM or VM_RAM_assumed > node.RAM_per_VM:
+
+            return 99999
 
     # egy ms csak egy VM-en lehet egyszerre
     for ms in range(len(ms_list)):
@@ -124,8 +122,8 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
                 containing_node = node_finder(VM)
                 latency_of_network = containing_node.network_latency
 
-                # a paraméterek alapján kiszámoljuk
-                # a késleltetést a csomóponton, minden ms additív tag
+                # a paraméterek alapján kiszámoljuk a késleltetést a csomóponton
+                # minden ms a VM-en additív tag
                 latency_of_VM = latency_of_VM + latency_calculator(actual_ms, containing_node)
 
         # ezek alapján egy service késleltetése az általa használt
@@ -155,4 +153,8 @@ def crossover(selected_individuals, population_size):
 # a lokális optimum elkerülése miatt mutációt végzünk az új populáción
 # TODO: ezt is parametrizáljuk
 def mutation(new_population):
+    pass
+
+
+def genetic_algorithm(matrix, nodes, ms_list):
     pass
