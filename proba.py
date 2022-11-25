@@ -4,6 +4,7 @@ from init_simulation import init_matrix
 from init_simulation import init_nodes
 from init_simulation import init_ms_list
 from genetic import genetic_algorithm
+from genetic import latency_calculator
 
 
 fog_num=2
@@ -52,6 +53,9 @@ nodes = init_nodes(fog_num, network_latencies, parameters)
 
 # létrehozzuk a genetikus algoritmus kezdeti mátrixát
 matrix = init_matrix(nodes, ms_list)
-print(matrix)
 
-# genetic_solution = genetic_algorithm(matrix, nodes, ms_list)
+# az optimalizált eredmény mátrixa TODO
+genetic_solution = genetic_algorithm(matrix, nodes, ms_list)
+
+# késleltetések az optimalizált mátrix alapján TODO
+latencies = latency_calculator(genetic_solution)
