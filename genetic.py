@@ -172,12 +172,44 @@ def select(generation):
 
 # keresztezzük a legjobbakat
 def crossover(selected_individuals, population_size):
-    pass
 
+    new_generation = []
+    
+    for i in range(len(selected_individuals)):
+
+        new_generation.append(selected_individuals[i])
+    
+    for _ in range((population_size-len(selected_individuals)) / 2):
+
+        parent1 = random.choice(selected_individuals)
+        parent2 = random.choice(selected_individuals)
+        child1 = Individual([])
+        child2 = Individual([])
+        split = random.randint(0, len(parent1.matrix[0]) - 1)
+
+        for VM in range(len(parent1.matrix1)):
+
+            child1.matrix1.append([])
+            child2.matrix1.append([])
+
+            for i in range(split):
+
+                child1.matrix1[VM].append(parent1.matrix1[VM][i])
+                child2.matrix1[VM].append(parent2.matrix1[VM][i])
+
+            for i in range(len(parent1.matrix1[0]) - split):
+
+                child1.matrix1[VM].append(parent2.matrix1[VM][split + i])
+                child2.matrix1[VM].append(parent1.matrix1[VM][split + i])
+
+        new_generation.append(child1)
+        new_generation.append(child2)
+    
+    return new_generation
 
 # a lokális optimum elkerülése miatt mutációt végzünk az új populáción
 # TODO: ezt is parametrizáljuk
-def mutation(new_population):
+def mutation(population):
     pass
 
 
