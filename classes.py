@@ -25,9 +25,9 @@ class Graph:
 
 class Individual:
 
-    def __init__(self, node_length, service_length):
-        # mátrix létrehozása
-        offload =[]
+    def __init__(self, matrix1, fitness=-1):
+        self.matrix1 = matrix1
+        self.fitness = fitness
 
 
     def __str__(self):

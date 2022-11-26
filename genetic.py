@@ -1,18 +1,36 @@
 import random
+from classes import Individual
 
 
 # inicializáljuk a kezdeti populációt
-def init_first(matrix, population_size):
-    
+# ha a matrix_of_individual = matrix operációt alkalmazzuk,
+# az hibás működést eredményez, mert megváltoztatja a matrix-ot is
+def init_first(matrix, population_size, nodes, service_num,
+               ms_num_per_service, ms_list):
+
     init_population = []
 
     for individual in range(population_size):
 
+        matrix_of_individual = []
+
         for VM in range(len(matrix)):
+            matrix_of_individual.append([])
             for MS in range(len(matrix[VM])):
-                matrix[VM][MS] = random.randint(0, 1)  # TODO: ezt itt le kell cserélni
-        
-        init_population.append(matrix)
+                matrix_of_individual[VM].append(0)
+
+        for MS in range(len(matrix_of_individual[0])):
+            # melyik VM-re rakja az ms-t?
+            ms_placement = random.randint(0, len(matrix_of_individual)-1)
+            matrix_of_individual[ms_placement][MS] = 1
+
+        latency_of_individual = calculate_fitness(matrix_of_individual,
+                                                  nodes, service_num,
+                                                  ms_num_per_service, ms_list)
+
+        generated_individual = Individual(matrix_of_individual, latency_of_individual)
+
+        init_population.append(generated_individual)
 
     return init_population
 
@@ -141,8 +159,15 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
                     
 
 # kiválasztjuk a legjobb egyedeket az implementált szabály alapján
-def select(ordered_fitness_list):
-    pass
+def select(generation):
+
+    # latency szerint növekvő sorrendbe rakjuk az egyedeket
+    generation.sort(key=lambda x: x.fitness, reverse=False)
+
+    # a felső 20%-ot választjuk ki keresztezésre
+    selected_individuals = generation[:int(0.2*len(generation))]
+
+    return selected_individuals
 
 
 # keresztezzük a legjobbakat
@@ -156,5 +181,10 @@ def mutation(new_population):
     pass
 
 
-def genetic_algorithm(matrix, nodes, ms_list):
-    pass
+def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
+                      service_num, ms_num_per_service):
+
+    first_generation = init_first(matrix, population_size, nodes, service_num,
+                                  ms_num_per_service, ms_list)
+
+    best_individuals = select(first_generation)
