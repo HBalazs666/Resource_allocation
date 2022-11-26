@@ -208,9 +208,30 @@ def crossover(selected_individuals, population_size):
     return new_generation
 
 # a lokális optimum elkerülése miatt mutációt végzünk az új populáción
+# szabály: i/ms_num eséllyel tesszünk át egy ms-t egy másik VM-re
+# az új VM random
 # TODO: ezt is parametrizáljuk
 def mutation(population):
-    pass
+    
+    p = 1/len(population[0].matrix1[0])  # TODO: ezzel kísérletezni
+
+    for individual in range(len(population)):
+
+        for ms in range(len(population[0].matrix1[0])):
+
+            if random.uniform(0.0, 1.0) <= p:
+
+                new_VM = random.randint(0, len(population[0].matrix1))
+
+                for VM in range(len(population[0].matrix1)):
+
+                    if VM == new_VM:
+                        population[individual].matrix1[VM][ms] = 1
+                    else:
+                        population[individual].matrix1[VM][ms] = 0
+
+    return population
+
 
 
 def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
