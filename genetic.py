@@ -1,4 +1,5 @@
 import random
+import math
 from classes import Individual
 
 
@@ -19,7 +20,7 @@ def init_first(matrix, population_size, nodes, service_num,
             for MS in range(len(matrix[VM])):
                 matrix_of_individual[VM].append(0)
 
-        for MS in range(len(matrix_of_individual[0])):
+        for MS in range(ms_num_per_service):
             # melyik VM-re rakja az ms-t?
             ms_placement = random.randint(0, len(matrix_of_individual)-1)
             matrix_of_individual[ms_placement][MS] = 1
@@ -68,15 +69,16 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
     for VM in range(len(matrix_of_individual)):
 
         for service in range(service_num):
-            sum = 0
+            total = 0
             
             for ms in range(ms_num_per_service):
-                sum = sum + matrix_of_individual[VM][ms_num_per_service*service + ms]
+                total = total + matrix_of_individual[VM][ms_num_per_service*service + ms]
 
             # ha ez igaz, akkor egyazon VM-en több service MS-e is fut,
             # ami nem megengedett
-            if sum > 0 and sum != sum(matrix_of_individual[VM]):
-                return 99999
+            if total > 0:
+                if total != sum(matrix_of_individual[VM]):
+                    return 99999
     
     # az egyes VM-ek kapacitásait nem lehet meghaladni
     for VM in range(len(matrix_of_individual)):
@@ -99,12 +101,12 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
     # egy ms csak egy VM-en lehet egyszerre
     for ms in range(len(ms_list)):
 
-        sum = 0
+        total = 0
 
-        for VM in range(matrix_of_individual):
-            sum = sum + matrix_of_individual[VM][ms]
+        for VM in range(len(matrix_of_individual)):
+            total = total + matrix_of_individual[VM][ms]
 
-        if sum == 0 or sum > 1:
+        if total == 0 or total > 1:
             return 99999
 
 
@@ -159,15 +161,29 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
                     
 
 # kiválasztjuk a legjobb egyedeket az implementált szabály alapján
-def select(generation):
+def select(generation, nodes, service_num, ms_num_per_service, ms_list):
+
+    for individual in generation:
+
+        individual.fitness = calculate_fitness(individual.matrix, nodes,
+                                               service_num,
+                                               ms_num_per_service, ms_list)
 
     # latency szerint növekvő sorrendbe rakjuk az egyedeket
     generation.sort(key=lambda x: x.fitness, reverse=False)
 
     # a felső 20%-ot választjuk ki keresztezésre
-    selected_individuals = generation[:int(0.2*len(generation))]
+    selected_individuals = generation[:4]
 
     return selected_individuals
+
+
+# mennyi leszármazottat kell létrehozni?
+def number_of_pairs(selected_num, population_size):
+
+    needed_pair = int(math.ceil((population_size-4) /2))
+
+    return needed_pair
 
 
 # keresztezzük a legjobbakat
@@ -179,7 +195,11 @@ def crossover(selected_individuals, population_size):
 
         new_generation.append(selected_individuals[i])
     
-    for _ in range((population_size-len(selected_individuals)) / 2):
+    selected_num = len(selected_individuals)
+
+    child_pair = number_of_pairs(selected_num, population_size)
+
+    for _ in range(child_pair):
 
         parent1 = random.choice(selected_individuals)
         parent2 = random.choice(selected_individuals)
@@ -187,20 +207,20 @@ def crossover(selected_individuals, population_size):
         child2 = Individual([])
         split = random.randint(0, len(parent1.matrix[0]) - 1)
 
-        for VM in range(len(parent1.matrix1)):
+        for VM in range(len(parent1.matrix)):
 
-            child1.matrix1.append([])
-            child2.matrix1.append([])
+            child1.matrix.append([])
+            child2.matrix.append([])
 
             for i in range(split):
 
-                child1.matrix1[VM].append(parent1.matrix1[VM][i])
-                child2.matrix1[VM].append(parent2.matrix1[VM][i])
+                child1.matrix[VM].append(parent1.matrix[VM][i])
+                child2.matrix[VM].append(parent2.matrix[VM][i])
 
-            for i in range(len(parent1.matrix1[0]) - split):
+            for i in range(len(parent1.matrix[0]) - split):
 
-                child1.matrix1[VM].append(parent2.matrix1[VM][split + i])
-                child2.matrix1[VM].append(parent1.matrix1[VM][split + i])
+                child1.matrix[VM].append(parent2.matrix[VM][split + i])
+                child2.matrix[VM].append(parent1.matrix[VM][split + i])
 
         new_generation.append(child1)
         new_generation.append(child2)
@@ -213,25 +233,24 @@ def crossover(selected_individuals, population_size):
 # TODO: ezt is parametrizáljuk
 def mutation(population):
     
-    p = 1/len(population[0].matrix1[0])  # TODO: ezzel kísérletezni
+    p = 1/len(population[0].matrix[0])  # TODO: ezzel kísérletezni
 
     for individual in range(len(population)):
 
-        for ms in range(len(population[0].matrix1[0])):
+        for ms in range(len(population[0].matrix[0])):
 
             if random.uniform(0.0, 1.0) <= p:
 
-                new_VM = random.randint(0, len(population[0].matrix1))
+                new_VM = random.randint(0, len(population[0].matrix))
 
-                for VM in range(len(population[0].matrix1)):
+                for VM in range(len(population[0].matrix)):
 
                     if VM == new_VM:
-                        population[individual].matrix1[VM][ms] = 1
+                        population[individual].matrix[VM][ms] = 1
                     else:
-                        population[individual].matrix1[VM][ms] = 0
+                        population[individual].matrix[VM][ms] = 0
 
     return population
-
 
 
 def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
@@ -240,4 +259,14 @@ def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
     first_generation = init_first(matrix, population_size, nodes, service_num,
                                   ms_num_per_service, ms_list)
 
-    best_individuals = select(first_generation)
+    best_individuals = select(first_generation, nodes, service_num,
+                              ms_num_per_service, ms_list)
+
+    for generation in range(generation_num):
+
+        new_generation = crossover(best_individuals, population_size)
+        mutated_generation = mutation(new_generation)
+        best_individuals = select(mutated_generation, nodes, service_num,
+                                  ms_num_per_service, ms_list)
+    
+    return best_individuals[0]

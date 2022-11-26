@@ -25,8 +25,8 @@ class Graph:
 
 class Individual:
 
-    def __init__(self, matrix1, fitness=-1):
-        self.matrix1 = matrix1
+    def __init__(self, matrix, fitness=-1):
+        self.matrix = matrix
         self.fitness = fitness
 
 
