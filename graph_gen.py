@@ -10,18 +10,18 @@ def graph_gen(fog_num):
 
     # ha a fog_num 1:
     # cloud csatlakozása
-    graph.add_edge(1, 0, random.randint(100, 200))
+    graph.add_edge(1, 0, random.randint(90000, 90000))
 
     # edge csatlakozások
-    graph.add_edge(1, 2, random.randint(1000, 2000))
-    graph.add_edge(1, 3, random.randint(1000, 2000))
+    graph.add_edge(1, 2, random.randint(1, 1))
+    graph.add_edge(1, 3, random.randint(1, 1))
 
     node_counter = 3  # azaz 4 node van, hiszen 0-tól számol
 
     if fog_num > 1:
         for fog in range(fog_num-1):
             # először a fog eszköz, ami a cloud-hoz és az előző fog-hoz csatlakozik:
-            graph.add_edge(node_counter+1, 0, random.randint(100, 200))
+            graph.add_edge(node_counter+1, 0, random.randint(90000, 90000))
             graph.add_edge(node_counter+1, node_counter-2, random.randint(300, 400))
 
             # most a két edge csatlakozás jön:

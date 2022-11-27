@@ -139,7 +139,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
                 service_number = int(ms/ms_num_per_service)
 
                 # kiderítjük melyik node-hoz tartozik
-                containing_node = node_finder(VM)
+                containing_node = node_finder(VM, nodes)
                 latency_of_network = containing_node.network_latency
 
                 # a paraméterek alapján kiszámoljuk a késleltetést a csomóponton
@@ -262,11 +262,16 @@ def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
     best_individuals = select(first_generation, nodes, service_num,
                               ms_num_per_service, ms_list)
 
+    best = best_individuals[0]
+
     for generation in range(generation_num):
 
         new_generation = crossover(best_individuals, population_size)
         mutated_generation = mutation(new_generation)
         best_individuals = select(mutated_generation, nodes, service_num,
                                   ms_num_per_service, ms_list)
+
+        if best_individuals[0].fitness < best.fitness:
+            best = best_individuals[0]
     
-    return best_individuals[0]
+    return best

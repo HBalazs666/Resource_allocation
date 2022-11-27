@@ -43,7 +43,7 @@ class Node:
         self.network_latency = network_latency
         self.VM_quantity = VM_quantity
         self.MIPS_per_VM = int(MIPS/VM_quantity)
-        self.RAM_per_VM = int(MIPS/RAM)
+        self.RAM_per_VM = int(MIPS/VM_quantity)
         self.index = index
 
 
