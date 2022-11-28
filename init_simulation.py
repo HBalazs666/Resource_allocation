@@ -1,5 +1,7 @@
 from classes import Microservice
 from classes import Node
+from classes import Individual
+from genetic import calculate_fitness
 import random
 
 
@@ -88,25 +90,28 @@ def init_matrix(nodes, ms_list):
     return matrix
 
 
-def init_random_states(states_per_iteration, VM_num, ms_num):
+# SA algoritmus függvényei ------------------------------------------------------
 
-    states = []
 
-    # kezdeti állapotok létrehozása
-    for state in range(states_per_iteration):
+def init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list):
 
-        matrix_of_individual = []
+    # kezdeti állapot létrehozása
 
-        for VM in range(VM_num):
-            matrix_of_individual.append([])
-            for MS in range(ms_num):
-                matrix_of_individual[VM].append(0)
+    matrix_of_individual = []
 
+    for VM in range(VM_num):
+        matrix_of_individual.append([])
         for MS in range(ms_num):
-            # melyik VM-re rakja az ms-t?
-            ms_placement = random.randint(0, VM_num-1)
-            matrix_of_individual[ms_placement][MS] = 1
+            matrix_of_individual[VM].append(0)
 
-        states.append(matrix_of_individual)
+    for MS in range(ms_num):
+        # melyik VM-re rakja az ms-t?
+        ms_placement = random.randint(0, VM_num-1)
+        matrix_of_individual[ms_placement][MS] = 1
 
-    return states
+    init_fitness = calculate_fitness(matrix_of_individual, nodes, service_num,
+                                     ms_num_per_service, ms_list)
+
+    init_individual = Individual(matrix_of_individual, init_fitness)
+
+    return init_individual

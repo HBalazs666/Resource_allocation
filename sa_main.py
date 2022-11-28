@@ -3,7 +3,7 @@ from graph_gen import dijkstra
 from init_simulation import init_matrix
 from init_simulation import init_nodes
 from init_simulation import init_ms_list
-from init_simulation import init_random_states
+from simulated_annealing import simulated_annealing
 
 
 fog_num = 1
@@ -54,11 +54,19 @@ parameters.append(VMs_per_edge)
 
 nodes = init_nodes(fog_num, network_latencies, parameters)
 
-# létrehozzuk a szimulált lehűlés kezdeti állapotvektorát
-states_per_iteration = 50
+# szimulációs paraméterek
+states_per_iteration = 50  # generált példányok iterációnként
+T_0 = 100  # kezdeti hőmérséklet
+alpha = 0.9  # hűlési együttható
+k_max = 50  # iterációk száma
+
 VM_num = VMs_per_cloud + VMs_per_fog*fog_num + VMs_per_edge*fog_num*2
 ms_num = len(ms_list)
-init_state_vector = init_random_states(nodes, ms_list,
-                                       states_per_iteration,
-                                       VM_num,
-                                       ms_num)
+
+# a szimuláció kimenete (Individual)
+solution = simulated_annealing(nodes, ms_list, states_per_iteration,
+                               VM_num, ms_num, service_quantity, ms_per_service,
+                               T_0, alpha, k_max)
+
+print(solution.matrix)
+print(solution.fitness)
