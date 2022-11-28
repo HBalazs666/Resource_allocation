@@ -10,11 +10,11 @@ def graph_gen(fog_num):
 
     # ha a fog_num 1:
     # cloud csatlakozása
-    graph.add_edge(1, 0, random.randint(90000, 90000))
+    graph.add_edge(1, 0, random.randint(2000, 2000))
 
     # edge csatlakozások
-    graph.add_edge(1, 2, random.randint(1, 1))
-    graph.add_edge(1, 3, random.randint(1, 1))
+    graph.add_edge(1, 2, random.randint(2000, 2000))
+    graph.add_edge(1, 3, random.randint(2000, 2000))
 
     node_counter = 3  # azaz 4 node van, hiszen 0-tól számol
 

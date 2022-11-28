@@ -78,12 +78,13 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
             # ami nem megengedett
             if total > 0:
                 if total != sum(matrix_of_individual[VM]):
+                    print("Egy VM-en több service MS-e is fut!")
                     return 99999
     
     # az egyes VM-ek kapacitásait nem lehet meghaladni
     for VM in range(len(matrix_of_individual)):
 
-        VM_MIPS_assumed = 0
+        # VM_MIPS_assumed = 0
         VM_RAM_assumed = 0
 
         node = node_finder(VM, nodes)
@@ -91,11 +92,11 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
         for ms in range(len(matrix_of_individual[VM])):
             if matrix_of_individual[VM][ms] == 1:
 
-                VM_MIPS_assumed = VM_MIPS_assumed + ms_list[ms].CPU_req
+                # VM_MIPS_assumed = VM_MIPS_assumed + ms_list[ms].CPU_req
                 VM_RAM_assumed = VM_RAM_assumed + ms_list[ms].RAM_req
 
-        if VM_MIPS_assumed > node.MIPS_per_VM or VM_RAM_assumed > node.RAM_per_VM:
-
+        if VM_RAM_assumed > node.RAM_per_VM:
+        # print("A VM RAM kapacitása nem elegendő!")
             return 99999
 
     # egy ms csak egy VM-en lehet egyszerre
@@ -107,6 +108,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
             total = total + matrix_of_individual[VM][ms]
 
         if total == 0 or total > 1:
+            # print("Egy MS több VM-en is fut, vagy egy MS nem lett sehol sem allokálva. Total: ", total)
             return 99999
 
 
@@ -275,3 +277,53 @@ def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
             best = best_individuals[0]
     
     return best
+
+
+def genetic_algorithm_backup(best_individual_matrix, nodes, ms_list,
+                             service_quantity, ms_per_service, VMs_per_cloud,
+                             backup_matrix):
+
+    cloud_node = nodes[0]
+    # keresünk használaton kívüli cloud VM-eket és a backup
+    # ms-eket ezeken helyezzük el;
+    # azonosítsuk a service-t
+    for service in range(service_quantity):
+
+        mss_of_service = ms_list[(ms_per_service*service):(ms_per_service + ms_per_service*service)]
+
+        # egy tömb, amivel nyilvántartjuk, hogy mely backupokat allokáltuk eddig
+        is_allocated = []
+        check = []
+        for ms in range(len(mss_of_service)):
+            is_allocated.append(0)
+            check.append(1)
+
+        # addig fut, amíg minden backup ms-t nem allokál
+        # (nincs hibakezelés, az elegendő VM-et garantálni kell!)
+        VM = 0
+        while is_allocated != check:
+
+            # tudjuk, hogy az első VM-ek a cloud-hoz tartoznak
+            # ha nincs használatban a VM, akkor lehet allokálni
+            if ((sum(best_individual_matrix[VM]) == 0) and (sum(backup_matrix[VM]) == 0)):
+
+                RAM_assumed = 0
+
+                # van elég hely (bármelyik allokálatlan ms-nek)?
+                for backup_ms in range(len(mss_of_service)):
+
+                    if ((RAM_assumed + mss_of_service[backup_ms].RAM_req) <= cloud_node.RAM_per_VM
+                        and is_allocated[backup_ms] != 1):
+
+                        RAM_assumed = RAM_assumed + mss_of_service[backup_ms].RAM_req
+
+                        backup_matrix[VM][backup_ms + service*ms_per_service] = 1
+
+                        is_allocated[backup_ms] = 1
+            
+            VM = VM + 1
+
+    backup_individual = Individual(backup_matrix)
+
+    return backup_individual
+
