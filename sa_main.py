@@ -18,10 +18,10 @@ network_latencies = dijkstra(graph, fog_num, starting_point)
 print(network_latencies)
 
 # inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
-service_quantity = 3  # hány darab legyen
-ms_per_service = 2  # servicenként mennyi ms legyen TODO: lehetne ez is változó
-MIPS_ms_min = 1000  # minimum MIPS
-MIPS_ms_max = 1000  # maximum MIPS
+service_quantity = 5  # hány darab legyen
+ms_per_service = 7  # servicenként mennyi ms legyen TODO: lehetne ez is változó
+MIPS_ms_min = 4000  # minimum MIPS
+MIPS_ms_max = 4000  # maximum MIPS
 RAM_ms_min = 5
 RAM_ms_max = 5
 
@@ -32,15 +32,15 @@ ms_list = init_ms_list(service_quantity, ms_per_service,
 # inicializáljuk a csomópontokat
 parameters = []
 # -------------------------------------------
-cloud_total_MIPS = [50000, 50000]  # 0
+cloud_total_MIPS = [500000, 500000]  # 0
 cloud_total_RAM = [1000000, 1000000]  # 1
-VMs_per_cloud = 5  # 2
-fog_total_MIPS = [1, 1]  # 3
+VMs_per_cloud = 50  # 2
+fog_total_MIPS = [250000, 250000]  # 3
 fog_total_RAM = [6000, 6000]  # 4
-VMs_per_fog = 1  # 5
-edge_total_MIPS = [1000, 1000]  # 6
+VMs_per_fog = 50  # 5
+edge_total_MIPS = [5000, 5000]  # 6
 edge_total_RAM = [10000, 10000]  # 7
-VMs_per_edge = 1  # 8
+VMs_per_edge = 3  # 8
 # -------------------------------------------
 parameters.append(cloud_total_MIPS)
 parameters.append(cloud_total_RAM)
@@ -55,10 +55,10 @@ parameters.append(VMs_per_edge)
 nodes = init_nodes(fog_num, network_latencies, parameters)
 
 # szimulációs paraméterek
-states_per_iteration = 50  # generált példányok iterációnként
+states_per_iteration = 20  # generált példányok iterációnként
 T_0 = 100  # kezdeti hőmérséklet
 alpha = 0.9  # hűlési együttható
-k_max = 50  # iterációk száma
+k_max = 200  # iterációk száma
 
 VM_num = VMs_per_cloud + VMs_per_fog*fog_num + VMs_per_edge*fog_num*2
 ms_num = len(ms_list)

@@ -96,7 +96,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
                 VM_RAM_assumed = VM_RAM_assumed + ms_list[ms].RAM_req
 
         if VM_RAM_assumed > node.RAM_per_VM:
-        # print("A VM RAM kapacitása nem elegendő!")
+            print("A VM RAM kapacitása nem elegendő!")
             return 99999
 
     # egy ms csak egy VM-en lehet egyszerre
@@ -108,7 +108,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
             total = total + matrix_of_individual[VM][ms]
 
         if total == 0 or total > 1:
-            # print("Egy MS több VM-en is fut, vagy egy MS nem lett sehol sem allokálva. Total: ", total)
+            print("Egy MS több VM-en is fut, vagy egy MS nem lett sehol sem allokálva. Total: ", total)
             return 99999
 
 
