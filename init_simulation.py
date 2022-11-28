@@ -79,10 +79,34 @@ def init_matrix(nodes, ms_list):
         VM_sum = VM_sum + nodes[node].VM_quantity
 
     matrix=[] #define empty matrix
-    for i in range(VM_sum): #total row is 3 (VM-ek)
+    for i in range(VM_sum): #(VM-ek)
         row=[] 
-        for j in range(MS_sum): #total column is 3 (MS-ek//gének)
+        for j in range(MS_sum): #(MS-ek//gének)
             row.append(0) #adding 0 value for each column for this row
         matrix.append(row) #add fully defined column into the row
 
     return matrix
+
+
+def init_random_states(states_per_iteration, VM_num, ms_num):
+
+    states = []
+
+    # kezdeti állapotok létrehozása
+    for state in range(states_per_iteration):
+
+        matrix_of_individual = []
+
+        for VM in range(VM_num):
+            matrix_of_individual.append([])
+            for MS in range(ms_num):
+                matrix_of_individual[VM].append(0)
+
+        for MS in range(ms_num):
+            # melyik VM-re rakja az ms-t?
+            ms_placement = random.randint(0, VM_num-1)
+            matrix_of_individual[ms_placement][MS] = 1
+
+        states.append(matrix_of_individual)
+
+    return states
