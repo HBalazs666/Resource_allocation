@@ -69,9 +69,9 @@ best_individual = genetic_algorithm(matrix, nodes, ms_list,
                                     population_size, service_quantity,
                                     ms_per_service)
 
-# print("Best individual: ",best_individual.matrix)
-# print("Fitness: ",best_individual.fitness)
-# print("init_matrix: ", matrix)
+print("Best individual: ",best_individual.matrix)
+print("Fitness: ",best_individual.fitness)
+print("init_matrix: ", matrix)
 
 backup_individual = genetic_algorithm_backup(best_individual.matrix,
                                              nodes, ms_list,
