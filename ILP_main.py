@@ -68,3 +68,4 @@ opt_model = Model(name = "Opt")
 x_ijk = opt_model.binary_var_matrix(len(matrix), len(matrix[0]), name='x_ijk')
 
 # constraintek definiálása
+asd = 0
