@@ -20,7 +20,7 @@ def init_first(matrix, population_size, nodes, service_num,
             for MS in range(len(matrix[VM])):
                 matrix_of_individual[VM].append(0)
 
-        for MS in range(ms_num_per_service):
+        for MS in range(len(ms_list)):
             # melyik VM-re rakja az ms-t?
             ms_placement = random.randint(0, len(matrix_of_individual)-1)
             matrix_of_individual[ms_placement][MS] = 1
@@ -32,6 +32,8 @@ def init_first(matrix, population_size, nodes, service_num,
         generated_individual = Individual(matrix_of_individual, latency_of_individual)
 
         init_population.append(generated_individual)
+    for i in init_population:
+        print(i.fitness," : ", i.matrix, "\n")
 
     return init_population
 
@@ -109,6 +111,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
 
         if total == 0 or total > 1:
             print("Egy MS több VM-en is fut, vagy egy MS nem lett sehol sem allokálva. Total: ", total)
+            print("Ez a hibás mátrix: ", matrix_of_individual)
             return 99999
 
 
@@ -243,7 +246,7 @@ def mutation(population):
 
             if random.uniform(0.0, 1.0) <= p:
 
-                new_VM = random.randint(0, len(population[0].matrix))
+                new_VM = random.randint(0, len(population[0].matrix) - 1)
 
                 for VM in range(len(population[0].matrix)):
 
