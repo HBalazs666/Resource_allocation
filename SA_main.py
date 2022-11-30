@@ -1,6 +1,7 @@
 from graph_gen import graph_gen
 from graph_gen import dijkstra
 from genetic import backup_services
+from genetic import cost_calculator
 from init_simulation import init_nodes
 from init_simulation import init_ms_list
 from init_simulation import init_matrix
@@ -73,6 +74,8 @@ best_individual = simulated_annealing(nodes, ms_list, states_per_iteration,
                                VM_num, ms_num, service_quantity, ms_per_service,
                                T_0, alpha, k_max)
 
+# cost = cost_calculator(best_individual.matrix, nodes)  # hibás a mátrix
+
 # backup_individual = backup_services(best_individual.matrix,
 #                                             nodes, ms_list,
 #                                             service_quantity,
@@ -80,6 +83,6 @@ best_individual = simulated_annealing(nodes, ms_list, states_per_iteration,
 #                                             VMs_per_cloud,
 #                                             matrix)
 
-print("Best individual: ",best_individual.matrix)
+# print("Best individual: ",best_individual.matrix)  # hibás értéket mutat
 print("Fitness: ",best_individual.fitness)
 #print("Backup matrix: ", backup_individual.matrix)

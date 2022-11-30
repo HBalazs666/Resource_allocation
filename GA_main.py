@@ -5,6 +5,7 @@ from init_simulation import init_nodes
 from init_simulation import init_ms_list
 from genetic import genetic_algorithm
 from genetic import backup_services
+from genetic import cost_calculator
 
 
 fog_num = 2
@@ -42,6 +43,9 @@ VMs_per_fog = 1  # 5
 edge_total_MIPS = [1000, 1000]  # 6
 edge_total_RAM = [10000, 10000]  # 7
 VMs_per_edge = 1  # 8
+cloud_cost_multiplier = 1  # 9
+fog_cost_multiplier = 4  # 10
+edge_cost_multiplier = 8  # 11
 # -------------------------------------------
 parameters.append(cloud_total_MIPS)
 parameters.append(cloud_total_RAM)
@@ -52,6 +56,9 @@ parameters.append(VMs_per_fog)
 parameters.append(edge_total_MIPS)
 parameters.append(edge_total_RAM)
 parameters.append(VMs_per_edge)
+parameters.append(cloud_cost_multiplier)
+parameters.append(fog_cost_multiplier)
+parameters.append(edge_cost_multiplier)
 
 nodes = init_nodes(fog_num, network_latencies, parameters)
 
@@ -69,9 +76,11 @@ best_individual = genetic_algorithm(matrix, nodes, ms_list,
                                     population_size, service_quantity,
                                     ms_per_service)
 
+cost_of_best = cost_calculator(best_individual.matrix, nodes)
+
 print("Best individual: ",best_individual.matrix)
 print("Fitness: ",best_individual.fitness)
-print("init_matrix: ", matrix)
+print("Cost: ", cost_of_best)
 
 # backup_individual = backup_services(best_individual.matrix,
 #                                             nodes, ms_list,

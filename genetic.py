@@ -335,3 +335,24 @@ def backup_services(best_individual_matrix, nodes, ms_list,
 
     return backup_individual
 
+
+def cost_calculator(matrix, nodes):
+
+    cost = 0
+
+    # szummázzuk a használatban lévő VM-ek költségeit
+    for VM in range(len(matrix)):
+
+        total = 0
+
+        for MS in range(len(matrix[VM])):
+            total = total + matrix[VM][MS]
+
+        if total >= 1:
+
+            # kikeressük a hozzá tartozó node-ot
+            node = node_finder(VM, nodes)
+
+            cost = cost + node.MIPS_per_VM * node.cost_multiplier
+
+    return cost

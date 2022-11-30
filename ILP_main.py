@@ -6,9 +6,10 @@ from init_simulation import init_matrix
 from init_simulation import init_nodes
 from classes import Graph
 from genetic import node_finder
+from genetic import cost_calculator
 
 
-fog_num = 1
+fog_num = 2
 starting_point = 3  # ehhez a ponthoz csatlakozik a service
 
 # itt generáljuk a mintahálózatot
@@ -20,7 +21,7 @@ network_latencies = dijkstra(graph, fog_num, starting_point)
 print(network_latencies)
 
 # inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
-service_quantity = 3  # hány darab legyen
+service_quantity = 5  # hány darab legyen
 ms_per_service = 2  # servicenként mennyi ms legyen TODO: lehetne ez is változó
 MIPS_ms_min = 1000  # minimum MIPS
 MIPS_ms_max = 1000  # maximum MIPS
@@ -43,6 +44,9 @@ VMs_per_fog = 1  # 5
 edge_total_MIPS = [1000, 1000]  # 6
 edge_total_RAM = [10000, 10000]  # 7
 VMs_per_edge = 1  # 8
+cloud_cost_multiplier = 1  # 9
+fog_cost_multiplier = 4  # 10
+edge_cost_multiplier = 8  # 11
 # -------------------------------------------
 parameters.append(cloud_total_MIPS)
 parameters.append(cloud_total_RAM)
@@ -53,6 +57,9 @@ parameters.append(VMs_per_fog)
 parameters.append(edge_total_MIPS)
 parameters.append(edge_total_RAM)
 parameters.append(VMs_per_edge)
+parameters.append(cloud_cost_multiplier)
+parameters.append(fog_cost_multiplier)
+parameters.append(edge_cost_multiplier)
 
 nodes = init_nodes(fog_num, network_latencies, parameters)
 
@@ -114,3 +121,17 @@ opt_model.print_information()
 
 opt_model.solve()
 opt_model.print_solution()
+
+best_individual = []
+
+for VM in range(len(matrix)):
+
+    best_individual.append([])
+
+    for MS in range(len(matrix[0])):
+        best_individual[VM].append(int(x_ijk[(VM,MS)].solution_value))
+
+print(best_individual)
+
+cost = cost_calculator(best_individual, nodes)
+print("Cost: ", cost)
