@@ -100,8 +100,10 @@ for VM in range(len(matrix)):
     VM_MIPS.append(act_VM.MIPS_per_VM)
 
 # c_i = (sum(x_ijk[VM, MS] * (ms_list[MS].CPU_req) for MS in range(len(ms_list))) + VM_network_latencies[VM])
-obj_fn = sum((sum(x_ijk[VM, MS] * (ms_list[MS].CPU_req / VM_MIPS[VM] * 1000) for MS in range(len(ms_list))) + VM_network_latencies[VM]) * \
-         sum(services[VM, service] for service in range(service_quantity)) for VM in range(len(matrix)) )
+#obj_fn = sum((sum(x_ijk[VM, MS] * (ms_list[MS].CPU_req / VM_MIPS[VM] * 1000) for MS in range(len(ms_list))) + VM_network_latencies[VM]) * \
+#         sum(services[VM, service] for service in range(service_quantity)) for VM in range(len(matrix)) )
+
+obj_fn = sum(sum(x_ijk[VM, MS] * (ms_list[MS].CPU_req / VM_MIPS[VM] * 1000) for MS in range(len(ms_list))) + sum(services[VM, service] for service in range(service_quantity))*VM_network_latencies[VM] for VM in range(len(matrix)))
 
 opt_model.set_objective('min', obj_fn)
 
