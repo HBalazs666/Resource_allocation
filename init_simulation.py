@@ -25,14 +25,14 @@ def init_nodes(fog_num, network_latencies, parameters):
 
     nodes = []
 
-    node_num = fog_num+1+fog_num*2
+    node_num = fog_num+2+fog_num*2
 
     # ezek a fog és edge szerverek sorszámai:
-    cloud_server = 0
+    cloud_server = [0, 1]
     fog_servers = []
     edge_servers = []
     for fog_node in range(fog_num):
-        fog = 1 + 3*fog_node
+        fog = 2 + 3*fog_node
         fog_servers.append(fog)
 
         edge_servers.append(fog+1)
@@ -41,7 +41,7 @@ def init_nodes(fog_num, network_latencies, parameters):
 
     for node in range(node_num):
 
-        if node == 0:
+        if node == 0 or node == 1:
             MIPS = random.randint(parameters[0][0], parameters[0][1])
             RAM = random.randint(parameters[1][0], parameters[1][1])
             VM_quantity = parameters[2]

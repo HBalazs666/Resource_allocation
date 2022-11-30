@@ -1,13 +1,14 @@
 from graph_gen import graph_gen
 from graph_gen import dijkstra
-from init_simulation import init_matrix
+from genetic import backup_services
 from init_simulation import init_nodes
 from init_simulation import init_ms_list
+from init_simulation import init_matrix
 from simulated_annealing import simulated_annealing
 
 
-fog_num = 2
-starting_point = 2  # ehhez a ponthoz csatlakozik a service
+fog_num = 1
+starting_point = 3  # ehhez a ponthoz csatlakozik a service
 
 # itt generáljuk a mintahálózatot
 graph = graph_gen(fog_num)
@@ -54,19 +55,31 @@ parameters.append(VMs_per_edge)
 
 nodes = init_nodes(fog_num, network_latencies, parameters)
 
+# létrehozzuk a genetikus algoritmus kezdeti mátrixát
+# csak a méretekhez kell
+matrix = init_matrix(nodes, ms_list)
+
 # szimulációs paraméterek
-states_per_iteration = 50  # generált példányok iterációnként
+states_per_iteration = 100  # generált példányok iterációnként
 T_0 = 100  # kezdeti hőmérséklet
 alpha = 0.99  # hűlési együttható
-k_max = 2000  # iterációk száma
+k_max = 4000  # iterációk száma
 
-VM_num = VMs_per_cloud + VMs_per_fog*fog_num + VMs_per_edge*fog_num*2
+VM_num = 2*VMs_per_cloud + VMs_per_fog*fog_num + VMs_per_edge*fog_num*2
 ms_num = len(ms_list)
 
 # a szimuláció kimenete (Individual)
-solution = simulated_annealing(nodes, ms_list, states_per_iteration,
+best_individual = simulated_annealing(nodes, ms_list, states_per_iteration,
                                VM_num, ms_num, service_quantity, ms_per_service,
                                T_0, alpha, k_max)
 
-print(solution.matrix)
-print(solution.fitness)
+# backup_individual = backup_services(best_individual.matrix,
+#                                             nodes, ms_list,
+#                                             service_quantity,
+#                                             ms_per_service,
+#                                             VMs_per_cloud,
+#                                             matrix)
+
+print("Best individual: ",best_individual.matrix)
+print("Fitness: ",best_individual.fitness)
+#print("Backup matrix: ", backup_individual.matrix)

@@ -4,11 +4,11 @@ from init_simulation import init_matrix
 from init_simulation import init_nodes
 from init_simulation import init_ms_list
 from genetic import genetic_algorithm
-from genetic import genetic_algorithm_backup
+from genetic import backup_services
 
 
 fog_num = 2
-starting_point = 2  # ehhez a ponthoz csatlakozik a service
+starting_point = 3  # ehhez a ponthoz csatlakozik a service
 
 # itt generáljuk a mintahálózatot
 graph = graph_gen(fog_num)
@@ -19,7 +19,7 @@ network_latencies = dijkstra(graph, fog_num, starting_point)
 print(network_latencies)
 
 # inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
-service_quantity = 3  # hány darab legyen
+service_quantity = 5  # hány darab legyen
 ms_per_service = 2  # servicenként mennyi ms legyen TODO: lehetne ez is változó
 MIPS_ms_min = 1000  # minimum MIPS
 MIPS_ms_max = 1000  # maximum MIPS
@@ -60,7 +60,7 @@ nodes = init_nodes(fog_num, network_latencies, parameters)
 matrix = init_matrix(nodes, ms_list)
 
 # -------------------------------------------
-generation_num = 200
+generation_num = 300
 population_size = 200
 # -------------------------------------------
 # a legjobb eredmény a megadott paraméterek mellett
@@ -73,11 +73,11 @@ print("Best individual: ",best_individual.matrix)
 print("Fitness: ",best_individual.fitness)
 print("init_matrix: ", matrix)
 
-backup_individual = genetic_algorithm_backup(best_individual.matrix,
-                                             nodes, ms_list,
-                                             service_quantity,
-                                             ms_per_service,
-                                             VMs_per_cloud,
-                                             matrix)
+# backup_individual = backup_services(best_individual.matrix,
+#                                             nodes, ms_list,
+#                                             service_quantity,
+#                                             ms_per_service,
+#                                             VMs_per_cloud,
+#                                             matrix)
 
-print("Backup matrix: ", backup_individual.matrix)
+# print("Backup matrix: ", backup_individual.matrix)

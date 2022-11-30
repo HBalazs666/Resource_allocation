@@ -80,7 +80,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
             # ami nem megengedett
             if total > 0:
                 if total != sum(matrix_of_individual[VM]):
-                    print("Egy VM-en több service MS-e is fut!")
+                    # print("Egy VM-en több service MS-e is fut!")
                     return 99999
     
     # az egyes VM-ek kapacitásait nem lehet meghaladni
@@ -287,7 +287,7 @@ def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
     return best
 
 
-def genetic_algorithm_backup(best_individual_matrix, nodes, ms_list,
+def backup_services(best_individual_matrix, nodes, ms_list,
                              service_quantity, ms_per_service, VMs_per_cloud,
                              backup_matrix):
 

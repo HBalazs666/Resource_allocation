@@ -8,8 +8,8 @@ from classes import Graph
 from genetic import node_finder
 
 
-fog_num = 2
-starting_point = 2  # ehhez a ponthoz csatlakozik a service
+fog_num = 1
+starting_point = 3  # ehhez a ponthoz csatlakozik a service
 
 # itt generáljuk a mintahálózatot
 graph = graph_gen(fog_num)
@@ -67,12 +67,15 @@ opt_model = Model(name = "Opt")
 
 # döntési változók (egyed mátrixa)
 x_ijk = opt_model.binary_var_matrix(len(matrix), len(matrix[0]), name='x_ijk')  # (VM, ms)
+xx_ijk = opt_model.binary_var_matrix(len(matrix), len(matrix[0]), name='xx_ijk')  # (VM, ms)
 services = opt_model.binary_var_matrix(len(matrix), service_quantity, name='services')  # (VM, service)
 
 # constraint no.1: Minden microservicet ki kell szolgálni, azaz minden microservice pontosan 1 gépen fut
 c1 = opt_model.add_constraints((sum([x_ijk[VM, MS] for VM in range(len(matrix))]) == 1
                             for MS in range(len(matrix[0]))),
                             names='Task_completion')
+
+# constraint no.1.1: Minden backupot is ki kell szolgálni
 
 # constraint no.2: A virtuális gép memória kapacitáshatárának eleget kell tenni
 for VM in range(len(matrix)):

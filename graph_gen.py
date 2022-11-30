@@ -4,29 +4,34 @@ import random
 def graph_gen(fog_num):
 
     node_counter = 0
-    node_num = fog_num+1+fog_num*2
+    node_num = fog_num+2+fog_num*2
 
     graph = Graph(node_num)
 
     # ha a fog_num 1:
-    # cloud csatlakozása
-    graph.add_edge(1, 0, random.randint(2000, 2000))
+    # cloudok csatlakozása
+    graph.add_edge(1, 0, random.randint(3000, 3000))
+
+    # fog csatlakozása
+    graph.add_edge(2, 0, random.randint(2000, 2000))
+    graph.add_edge(2, 1, random.randint(2000, 2000))
 
     # edge csatlakozások
-    graph.add_edge(1, 2, random.randint(2000, 2000))
-    graph.add_edge(1, 3, random.randint(2000, 2000))
+    graph.add_edge(2, 3, random.randint(2000, 2000))
+    graph.add_edge(2, 4, random.randint(2000, 2000))
 
-    node_counter = 3  # azaz 4 node van, hiszen 0-tól számol
+    node_counter = 4  # azaz 5 node van, hiszen 0-tól számol
 
     if fog_num > 1:
         for fog in range(fog_num-1):
-            # először a fog eszköz, ami a cloud-hoz és az előző fog-hoz csatlakozik:
-            graph.add_edge(node_counter+1, 0, random.randint(90000, 90000))
-            graph.add_edge(node_counter+1, node_counter-2, random.randint(400, 400))
+            # először a fog eszköz, ami a cloudok-hoz és az előző fog-hoz csatlakozik:
+            graph.add_edge(node_counter+1, 0, random.randint(90000, 90000))  # cloud 1
+            graph.add_edge(node_counter+1, 1, random.randint(90000, 90000))  # cloud 2
+            graph.add_edge(node_counter+1, node_counter-2, random.randint(400, 400))  # előző fog
 
             # most a két edge csatlakozás jön:
-            graph.add_edge(node_counter+1, node_counter+2, random.randint(1000, 2000))
-            graph.add_edge(node_counter+1, node_counter+3, random.randint(1000, 2000))
+            graph.add_edge(node_counter+1, node_counter+2, random.randint(2000, 2000))
+            graph.add_edge(node_counter+1, node_counter+3, random.randint(2000, 2000))
 
             node_counter = node_counter+3
 
@@ -80,7 +85,7 @@ def calculate_actual_neighbours(graph, list_of_neighbours, checked, distances):
 
 def dijkstra(graph, fog_num, starting_point):
 
-    node_num = fog_num+1+fog_num*2
+    node_num = fog_num+2+fog_num*2
 
     # inicializáció
     distances = []

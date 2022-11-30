@@ -61,14 +61,14 @@ def simulated_annealing(nodes, ms_list, states_per_iteration,
             created_individual = Individual(individual_matrices[individual], fitness_of_individual)
             individuals.append(created_individual)
 
-        for individual in individuals:
+        for individual in range(len(individuals)):
 
-            if individual.fitness < best_individual.fitness:
-                best_individual = individual
+            if individuals[individual].fitness < best_individual.fitness:
+                best_individual = individuals[individual]
             else:
-                p = math.exp(-(individual.fitness - best_individual.fitness) / (T))
+                p = math.exp(-(individuals[individual].fitness - best_individual.fitness) / (T))
                 if random.uniform(0, 1) <= p:
-                    best_individual = individual
+                    best_individual = individuals[individual]
 
     return best_individual
         
