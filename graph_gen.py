@@ -22,7 +22,7 @@ def graph_gen(fog_num):
         for fog in range(fog_num-1):
             # először a fog eszköz, ami a cloud-hoz és az előző fog-hoz csatlakozik:
             graph.add_edge(node_counter+1, 0, random.randint(90000, 90000))
-            graph.add_edge(node_counter+1, node_counter-2, random.randint(300, 400))
+            graph.add_edge(node_counter+1, node_counter-2, random.randint(400, 400))
 
             # most a két edge csatlakozás jön:
             graph.add_edge(node_counter+1, node_counter+2, random.randint(1000, 2000))

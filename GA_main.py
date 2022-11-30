@@ -7,7 +7,7 @@ from genetic import genetic_algorithm
 from genetic import genetic_algorithm_backup
 
 
-fog_num = 10
+fog_num = 2
 starting_point = 2  # ehhez a ponthoz csatlakozik a service
 
 # itt generáljuk a mintahálózatot
@@ -35,7 +35,7 @@ parameters = []
 # -------------------------------------------
 cloud_total_MIPS = [50000, 50000]  # 0
 cloud_total_RAM = [1000000, 1000000]  # 1
-VMs_per_cloud = 5  # 2
+VMs_per_cloud = 2  # 2
 fog_total_MIPS = [1, 1]  # 3
 fog_total_RAM = [6000, 6000]  # 4
 VMs_per_fog = 1  # 5
@@ -60,8 +60,8 @@ nodes = init_nodes(fog_num, network_latencies, parameters)
 matrix = init_matrix(nodes, ms_list)
 
 # -------------------------------------------
-generation_num = 20
-population_size = 20
+generation_num = 200
+population_size = 200
 # -------------------------------------------
 # a legjobb eredmény a megadott paraméterek mellett
 best_individual = genetic_algorithm(matrix, nodes, ms_list,

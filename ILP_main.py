@@ -5,6 +5,7 @@ from init_simulation import init_ms_list
 from init_simulation import init_matrix
 from init_simulation import init_nodes
 from classes import Graph
+from genetic import node_finder
 
 
 fog_num = 2
@@ -65,7 +66,46 @@ matrix = init_matrix(nodes, ms_list)
 opt_model = Model(name = "Opt")
 
 # döntési változók (egyed mátrixa)
-x_ijk = opt_model.binary_var_matrix(len(matrix), len(matrix[0]), name='x_ijk')
+x_ijk = opt_model.binary_var_matrix(len(matrix), len(matrix[0]), name='x_ijk')  # (VM, ms)
+services = opt_model.binary_var_matrix(len(matrix), service_quantity, name='services')  # (VM, service)
 
-# constraintek definiálása
-asd = 0
+# constraint no.1: Minden microservicet ki kell szolgálni, azaz minden microservice pontosan 1 gépen fut
+c1 = opt_model.add_constraints((sum([x_ijk[VM, MS] for VM in range(len(matrix))]) == 1
+                            for MS in range(len(matrix[0]))),
+                            names='Task_completion')
+
+# constraint no.2: A virtuális gép memória kapacitáshatárának eleget kell tenni
+for VM in range(len(matrix)):
+    
+    node = node_finder(VM, nodes)
+
+    c2 = opt_model.add_constraint(sum(ms_list[MS].RAM_req*x_ijk[VM, MS] for MS in range(len(matrix[0]))) <= nodes[node.index].RAM_per_VM)
+
+# constraint no.3: Egy VM-en csak egy service ms-ei lehetnek
+for VM in range(len(matrix)):
+    for service in range(service_quantity):
+        for ms in range(ms_per_service):
+
+            c3 = opt_model.add_constraint(x_ijk[VM, ms + service*ms_per_service] <= services[VM, service])
+
+    c32 = opt_model.add_constraint(sum(services[VM, service] for service in range(service_quantity)) <= 1)
+
+# célfüggvény
+# VM-ek késleltetésösszegének minimalizálása
+VM_network_latencies = []
+VM_MIPS = []
+for VM in range(len(matrix)):
+    act_VM = node_finder(VM, nodes)
+    VM_network_latencies.append(act_VM.network_latency)
+    VM_MIPS.append(act_VM.MIPS_per_VM)
+
+# c_i = (sum(x_ijk[VM, MS] * (ms_list[MS].CPU_req) for MS in range(len(ms_list))) + VM_network_latencies[VM])
+obj_fn = sum((sum(x_ijk[VM, MS] * (ms_list[MS].CPU_req / VM_MIPS[VM] * 1000) for MS in range(len(ms_list))) + VM_network_latencies[VM]) * \
+         sum(services[VM, service] for service in range(service_quantity)) for VM in range(len(matrix)) )
+
+opt_model.set_objective('min', obj_fn)
+
+opt_model.print_information()
+
+opt_model.solve()
+opt_model.print_solution()

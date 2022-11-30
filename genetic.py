@@ -158,11 +158,16 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
             total_latency = latency_of_network + latency_of_VM
             latencies_by_VMs[service_number].append(total_latency)
 
-    for service in range(service_num):
+    #for service in range(service_num):
 
-        service_latencies.append(max(latencies_by_VMs[service]))
+    #    service_latencies.append(max(latencies_by_VMs[service]))
 
-    return sum(service_latencies)
+    total = 0
+
+    for service in range(len(latencies_by_VMs)):
+        total = total + sum(latencies_by_VMs[service])
+
+    return total
                     
 
 # kiválasztjuk a legjobb egyedeket az implementált szabály alapján
