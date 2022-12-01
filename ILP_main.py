@@ -9,7 +9,7 @@ from genetic import node_finder
 from genetic import cost_calculator
 
 
-fog_num = 2
+fog_num = 1
 starting_point = 3  # ehhez a ponthoz csatlakozik a service
 
 # itt generáljuk a mintahálózatot
@@ -21,8 +21,8 @@ network_latencies = dijkstra(graph, fog_num, starting_point)
 print(network_latencies)
 
 # inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
-service_quantity = 2  # hány darab legyen
-ms_per_service = 2  # servicenként mennyi ms legyen TODO: lehetne ez is változó
+service_quantity = 4  # hány darab legyen
+ms_per_service = 3  # servicenként mennyi ms legyen TODO: lehetne ez is változó
 MIPS_ms_min = 1000  # minimum MIPS
 MIPS_ms_max = 1000  # maximum MIPS
 RAM_ms_min = 5
@@ -37,13 +37,13 @@ parameters = []
 # -------------------------------------------
 cloud_total_MIPS = [50000, 50000]  # 0
 cloud_total_RAM = [1000000, 1000000]  # 1
-VMs_per_cloud = 2  # 2
-fog_total_MIPS = [1, 1]  # 3
+VMs_per_cloud = 8  # 2
+fog_total_MIPS = [10000, 10000]  # 3
 fog_total_RAM = [6000, 6000]  # 4
-VMs_per_fog = 1  # 5
+VMs_per_fog = 3  # 5
 edge_total_MIPS = [1000, 1000]  # 6
 edge_total_RAM = [10000, 10000]  # 7
-VMs_per_edge = 1  # 8
+VMs_per_edge = 3  # 8
 cloud_cost_multiplier = 1  # 9
 fog_cost_multiplier = 4  # 10
 edge_cost_multiplier = 8  # 11

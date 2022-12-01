@@ -32,8 +32,8 @@ def init_first(matrix, population_size, nodes, service_num,
         generated_individual = Individual(matrix_of_individual, latency_of_individual)
 
         init_population.append(generated_individual)
-    for i in init_population:
-        print(i.fitness," : ", i.matrix, "\n")
+    #for i in init_population:
+    #    print(i.fitness," : ", i.matrix, "\n")
 
     return init_population
 
@@ -81,7 +81,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
             if total > 0:
                 if total != sum(matrix_of_individual[VM]):
                     # print("Egy VM-en több service MS-e is fut!")
-                    return 99999
+                    return 999999999
     
     # az egyes VM-ek kapacitásait nem lehet meghaladni
     for VM in range(len(matrix_of_individual)):
@@ -99,7 +99,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
 
         if VM_RAM_assumed > node.RAM_per_VM:
             print("A VM RAM kapacitása nem elegendő!")
-            return 99999
+            return 999999999
 
     # egy ms csak egy VM-en lehet egyszerre
     for ms in range(len(ms_list)):
@@ -112,7 +112,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
         if total == 0 or total > 1:
             print("Egy MS több VM-en is fut, vagy egy MS nem lett sehol sem allokálva. Total: ", total)
             print("Ez a hibás mátrix: ", matrix_of_individual)
-            return 99999
+            return 999999999
 
 
     # ha nincs ütközés a kikötések mentén, akkor normál módon
@@ -178,6 +178,27 @@ def select(generation, nodes, service_num, ms_num_per_service, ms_list):
         individual.fitness = calculate_fitness(individual.matrix, nodes,
                                                service_num,
                                                ms_num_per_service, ms_list)
+
+    # latency szerint növekvő sorrendbe rakjuk az egyedeket
+    generation.sort(key=lambda x: x.fitness, reverse=False)
+
+    # a felső 20%-ot választjuk ki keresztezésre
+    selected_individuals = generation[:4]
+
+    return selected_individuals
+
+
+# kiválasztjuk a legjobb egyedeket az implementált szabály alapján
+# backup verzió
+def backup_select(generation, nodes, service_num, ms_num_per_service, ms_list,
+                  allocated_matrix):
+
+    for individual in generation:
+
+        individual.fitness = calculate_backup_fitness(individual.matrix, nodes,
+                                                      service_num,
+                                                      ms_num_per_service, ms_list,
+                                                      allocated_matrix)
 
     # latency szerint növekvő sorrendbe rakjuk az egyedeket
     generation.sort(key=lambda x: x.fitness, reverse=False)
@@ -287,55 +308,118 @@ def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
     return best
 
 
-def backup_services(best_individual_matrix, nodes, ms_list,
-                             service_quantity, ms_per_service, VMs_per_cloud,
-                             backup_matrix):
+def backup_genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
+                             service_num, ms_num_per_service, allocated_matrix):
 
-    cloud_node = nodes[0]
-    # keresünk használaton kívüli cloud VM-eket és a backup
-    # ms-eket ezeken helyezzük el;
-    # azonosítsuk a service-t
-    for service in range(service_quantity):
+    first_generation = init_first(matrix, population_size, nodes, service_num,
+                                  ms_num_per_service, ms_list)
 
-        mss_of_service = ms_list[(ms_per_service*service):(ms_per_service + ms_per_service*service)]
+    best_individuals = backup_select(first_generation, nodes, service_num,
+                                     ms_num_per_service, ms_list, allocated_matrix)
 
-        # egy tömb, amivel nyilvántartjuk, hogy mely backupokat allokáltuk eddig
-        is_allocated = []
-        check = []
-        for ms in range(len(mss_of_service)):
-            is_allocated.append(0)
-            check.append(1)
+    best = best_individuals[0]
 
-        # addig fut, amíg minden backup ms-t nem allokál
-        # (nincs hibakezelés, az elegendő VM-et garantálni kell!)
-        VM = 0
-        while is_allocated != check:
+    for generation in range(generation_num):
 
-            # tudjuk, hogy az első VM-ek a cloud-hoz tartoznak
-            # ha nincs használatban a VM, akkor lehet allokálni
-            if ((sum(best_individual_matrix[VM]) == 0) and (sum(backup_matrix[VM]) == 0)):
+        new_generation = crossover(best_individuals, population_size)
+        mutated_generation = mutation(new_generation)
+        best_individuals = backup_select(mutated_generation, nodes, service_num,
+                                         ms_num_per_service, ms_list, allocated_matrix)
 
-                RAM_assumed = 0
+        if best_individuals[0].fitness < best.fitness:
+            best = best_individuals[0]
+    
+    return best
 
-                # van elég hely (bármelyik allokálatlan ms-nek)?
-                for backup_ms in range(len(mss_of_service)):
 
-                    if ((RAM_assumed + mss_of_service[backup_ms].RAM_req) <= cloud_node.RAM_per_VM
-                        and is_allocated[backup_ms] != 1):
+# itt költségre minimalizálunk
+def calculate_backup_fitness(matrix_of_individual, nodes, service_num,
+                             ms_num_per_service, ms_list, allocated_matrix):
 
-                        RAM_assumed = RAM_assumed + mss_of_service[backup_ms].RAM_req
+    # constraintek
+    # egy VM-en különböző servicekhez tartozó
+    # MS-ek nem lehetnek
+    for VM in range(len(matrix_of_individual)):
 
-                        backup_matrix[VM][backup_ms + service*ms_per_service] = 1
-
-                        is_allocated[backup_ms] = 1
+        for service in range(service_num):
+            total = 0
             
-            VM = VM + 1
+            for ms in range(ms_num_per_service):
+                total = total + matrix_of_individual[VM][ms_num_per_service*service + ms]
 
-    backup_individual = Individual(backup_matrix)
+            # ha ez igaz, akkor egyazon VM-en több service MS-e is fut,
+            # ami nem megengedett
+            if total > 0:
+                if total != sum(matrix_of_individual[VM]):
+                    # print("Egy VM-en több service MS-e is fut!")
+                    return 999999999
+    
+    # az egyes VM-ek kapacitásait nem lehet meghaladni
+    for VM in range(len(matrix_of_individual)):
 
-    return backup_individual
+        # VM_MIPS_assumed = 0
+        VM_RAM_assumed = 0
+
+        node = node_finder(VM, nodes)
+
+        for ms in range(len(matrix_of_individual[VM])):
+            if matrix_of_individual[VM][ms] == 1:
+
+                # VM_MIPS_assumed = VM_MIPS_assumed + ms_list[ms].CPU_req
+                VM_RAM_assumed = VM_RAM_assumed + ms_list[ms].RAM_req
+
+        if VM_RAM_assumed > node.RAM_per_VM:
+            print("A VM RAM kapacitása nem elegendő!")
+            return 999999999
+
+    # egy ms csak egy VM-en lehet egyszerre
+    for ms in range(len(ms_list)):
+
+        total = 0
+
+        for VM in range(len(matrix_of_individual)):
+            total = total + matrix_of_individual[VM][ms]
+
+        if total == 0 or total > 1:
+            print("Egy MS több VM-en is fut, vagy egy MS nem lett sehol sem allokálva. Total: ", total)
+            print("Ez a hibás mátrix: ", matrix_of_individual)
+            return 999999999
+
+    # azok a VM-ek, amik már használatban vannak, nem használhatóak
+    for VM in range(len(matrix_of_individual)):
+
+        if sum(allocated_matrix[VM]) != 0 and sum(matrix_of_individual[VM]) != 0:
+            print("A ", VM, "-edik VM nem használható!")
+            return 999999999
+
+# -----------------------------------------------------------------
+# ha eddig nem volt retun, a költség már számolható
+    cost = 0
+
+    # VM-ek költségei
+    VM_costs = []
+    for VM in range(len(matrix_of_individual)):
+
+        act_node = node_finder(VM, nodes)
+        VM_costs.append(act_node.MIPS_per_VM*act_node.cost_multiplier)
+
+    # ha a VM használatban van, költséget számolunk fel
+    for VM in range(len(matrix_of_individual)):
+
+        total = 0
+
+        for MS in range(len(matrix_of_individual[0])):
+
+            total = total + matrix_of_individual[VM][MS]
+
+        if total > 0:
+
+            cost = cost + VM_costs[VM]
+
+    return cost
 
 
+# költségszámítás nem backupoknak
 def cost_calculator(matrix, nodes):
 
     cost = 0

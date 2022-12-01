@@ -2,6 +2,7 @@ from init_simulation import init_sa
 import math
 import random
 from genetic import calculate_fitness
+from genetic import calculate_backup_fitness
 from classes import Individual
 
 
@@ -72,3 +73,40 @@ def simulated_annealing(nodes, ms_list, states_per_iteration,
 
     return best_individual
         
+
+def backup_simulated_annealing(nodes, ms_list, states_per_iteration,
+                               VM_num, ms_num, service_num,
+                               ms_num_per_service,
+                               T_0, alpha, k_max, allocated_matrix):
+
+    init_individual = init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list)
+
+    best_individual = init_individual
+
+    for k in range(k_max):
+
+        individuals = []
+
+        T = T_0 * (alpha**k)
+
+        individual_matrices = gen_individual_matrices(best_individual, states_per_iteration)
+
+        for individual in range(len(individual_matrices)):
+            fitness_of_individual = calculate_backup_fitness(individual_matrices[individual],
+                                                             nodes, service_num,
+                                                             ms_num_per_service, ms_list,
+                                                             allocated_matrix)
+
+            created_individual = Individual(individual_matrices[individual], fitness_of_individual)
+            individuals.append(created_individual)
+
+        for individual in range(len(individuals)):
+
+            if individuals[individual].fitness < best_individual.fitness:
+                best_individual = individuals[individual]
+            else:
+                p = math.exp(-(individuals[individual].fitness - best_individual.fitness) / (T))
+                if random.uniform(0, 1) <= p:
+                    best_individual = individuals[individual]
+
+    return best_individual

@@ -4,11 +4,12 @@ from init_simulation import init_matrix
 from init_simulation import init_nodes
 from init_simulation import init_ms_list
 from genetic import genetic_algorithm
-from genetic import backup_services
+from genetic import backup_genetic_algorithm
 from genetic import cost_calculator
+from genetic import calculate_fitness
 
 
-fog_num = 2
+fog_num = 1
 starting_point = 3  # ehhez a ponthoz csatlakozik a service
 
 # itt generáljuk a mintahálózatot
@@ -20,8 +21,8 @@ network_latencies = dijkstra(graph, fog_num, starting_point)
 print(network_latencies)
 
 # inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
-service_quantity = 5  # hány darab legyen
-ms_per_service = 2  # servicenként mennyi ms legyen TODO: lehetne ez is változó
+service_quantity = 4  # hány darab legyen
+ms_per_service = 3  # servicenként mennyi ms legyen TODO: lehetne ez is változó
 MIPS_ms_min = 1000  # minimum MIPS
 MIPS_ms_max = 1000  # maximum MIPS
 RAM_ms_min = 5
@@ -36,13 +37,13 @@ parameters = []
 # -------------------------------------------
 cloud_total_MIPS = [50000, 50000]  # 0
 cloud_total_RAM = [1000000, 1000000]  # 1
-VMs_per_cloud = 2  # 2
-fog_total_MIPS = [1, 1]  # 3
+VMs_per_cloud = 8  # 2
+fog_total_MIPS = [10000, 10000]  # 3
 fog_total_RAM = [6000, 6000]  # 4
-VMs_per_fog = 1  # 5
+VMs_per_fog = 3  # 5
 edge_total_MIPS = [1000, 1000]  # 6
 edge_total_RAM = [10000, 10000]  # 7
-VMs_per_edge = 1  # 8
+VMs_per_edge = 3  # 8
 cloud_cost_multiplier = 1  # 9
 fog_cost_multiplier = 4  # 10
 edge_cost_multiplier = 8  # 11
@@ -67,8 +68,8 @@ nodes = init_nodes(fog_num, network_latencies, parameters)
 matrix = init_matrix(nodes, ms_list)
 
 # -------------------------------------------
-generation_num = 300
-population_size = 200
+generation_num = 600
+population_size = 150
 # -------------------------------------------
 # a legjobb eredmény a megadott paraméterek mellett
 best_individual = genetic_algorithm(matrix, nodes, ms_list,
@@ -82,11 +83,18 @@ print("Best individual: ",best_individual.matrix)
 print("Fitness: ",best_individual.fitness)
 print("Cost: ", cost_of_best)
 
-# backup_individual = backup_services(best_individual.matrix,
-#                                             nodes, ms_list,
-#                                             service_quantity,
-#                                             ms_per_service,
-#                                             VMs_per_cloud,
-#                                             matrix)
+backup_individual = backup_genetic_algorithm(matrix,
+                                             nodes, ms_list,
+                                             generation_num,
+                                             population_size,
+                                             service_quantity,
+                                             ms_per_service,
+                                             best_individual.matrix)
 
-# print("Backup matrix: ", backup_individual.matrix)
+print("Backup matrix: ", backup_individual.matrix)
+print("Backup cost: ", backup_individual.fitness)
+
+latency_of_backup = calculate_fitness(backup_individual.matrix, nodes, service_quantity,
+                                      ms_per_service, ms_list)
+
+print("Backup fitness: ", latency_of_backup)
