@@ -1,6 +1,7 @@
 from init_simulation import init_sa
 import math
 import random
+import copy
 from genetic import calculate_fitness
 from genetic import calculate_backup_fitness
 from classes import Individual
@@ -9,21 +10,23 @@ from classes import Individual
 # 1 ms-t random VM-re átpakolunk
 def change_one(best_individual_matrix):
     
+    new = copy.deepcopy(best_individual_matrix)
+
     # random választunk egy ms-t, amit át szeretnénk pakolni
-    ms_num = random.randint(0, len(best_individual_matrix[0]) - 1)
+    ms_num = random.randint(0, len(new[0]) - 1)
 
     # random választunk egy új VM-et
-    new_VM = random.randint(0, len(best_individual_matrix) - 1)
+    new_VM = random.randint(0, len(new) - 1)
 
     # mindent kinullázunk, kivéve az újat
-    for VM in range(len(best_individual_matrix)):
+    for VM in range(len(new)):
 
         if VM == new_VM:
-            best_individual_matrix[VM][ms_num] = 1
+            new[VM][ms_num] = 1
         else:
-            best_individual_matrix[VM][ms_num] = 0
+            new[VM][ms_num] = 0
 
-    return best_individual_matrix
+    return new
 
 
 # csak szomszédos állapotok generálhatóak a legjobb egyedből
@@ -54,22 +57,26 @@ def simulated_annealing(nodes, ms_list, states_per_iteration,
         T = T_0 * (alpha**k)
 
         individual_matrices = gen_individual_matrices(best_individual, states_per_iteration)
+        #for i in range(len(individual_matrices)):    
+        #    print("GENERÁLT INDIVIDUAL MÁTRIX ",i,": ",individual_matrices[i], "\n")
 
         for individual in range(len(individual_matrices)):
+        #    print("A ",individual,". mátrix: ", individual_matrices[individual], "\n")
             fitness_of_individual = calculate_fitness(individual_matrices[individual],
                                                       nodes, service_num,
                                                       ms_num_per_service, ms_list)
+        #    print("A ",individual,". mátrix fitnesse: ",fitness_of_individual,"\n")
             created_individual = Individual(individual_matrices[individual], fitness_of_individual)
             individuals.append(created_individual)
 
         for individual in range(len(individuals)):
 
             if individuals[individual].fitness < best_individual.fitness:
-                best_individual = individuals[individual]
+                best_individual = copy.deepcopy(individuals[individual])
             else:
                 p = math.exp(-(individuals[individual].fitness - best_individual.fitness) / (T))
                 if random.uniform(0, 1) <= p:
-                    best_individual = individuals[individual]
+                    best_individual = copy.deepcopy(individuals[individual])
 
     return best_individual
         
@@ -103,10 +110,10 @@ def backup_simulated_annealing(nodes, ms_list, states_per_iteration,
         for individual in range(len(individuals)):
 
             if individuals[individual].fitness < best_individual.fitness:
-                best_individual = individuals[individual]
+                best_individual = copy.deepcopy(individuals[individual])
             else:
                 p = math.exp(-(individuals[individual].fitness - best_individual.fitness) / (T))
                 if random.uniform(0, 1) <= p:
-                    best_individual = individuals[individual]
+                    best_individual = copy.deepcopy(individuals[individual])
 
     return best_individual

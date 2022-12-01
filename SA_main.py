@@ -38,13 +38,13 @@ parameters = []
 # -------------------------------------------
 cloud_total_MIPS = [50000, 50000]  # 0
 cloud_total_RAM = [1000000, 1000000]  # 1
-VMs_per_cloud = 8  # 2
+VMs_per_cloud = 4  # 2
 fog_total_MIPS = [10000, 10000]  # 3
 fog_total_RAM = [6000, 6000]  # 4
 VMs_per_fog = 3  # 5
 edge_total_MIPS = [1000, 1000]  # 6
 edge_total_RAM = [10000, 10000]  # 7
-VMs_per_edge = 3  # 8
+VMs_per_edge = 2  # 8
 cloud_cost_multiplier = 1  # 9
 fog_cost_multiplier = 4  # 10
 edge_cost_multiplier = 8  # 11
@@ -72,7 +72,7 @@ matrix = init_matrix(nodes, ms_list)
 states_per_iteration = 100  # generált példányok iterációnként
 T_0 = 1000  # kezdeti hőmérséklet
 alpha = 0.95  # hűlési együttható
-k_max = 1000  # iterációk száma
+k_max = 300  # iterációk száma
 
 VM_num = 2*VMs_per_cloud + VMs_per_fog*fog_num + VMs_per_edge*fog_num*2
 ms_num = len(ms_list)
@@ -86,11 +86,8 @@ best_individual = simulated_annealing(nodes, ms_list, states_per_iteration,
 cost_of_best = cost_calculator(best_individual.matrix, nodes)
 
 print("Best individual: ",best_individual.matrix)
+print("Fitness (latency): ",best_individual.fitness)
 print("Cost: ", cost_of_best)
-
-# print("Best individual: ",best_individual.matrix)  # hibás értéket mutat
-print("Fitness: ",best_individual.fitness)
-#print("Backup matrix: ", backup_individual.matrix)
 
 backup_individual = backup_simulated_annealing(nodes, ms_list,
                                                states_per_iteration,
@@ -99,14 +96,10 @@ backup_individual = backup_simulated_annealing(nodes, ms_list,
                                                T_0, alpha, k_max, best_individual.matrix)
 
 print("Backup matrix: ", backup_individual.matrix)
-print("Backup cost: ", backup_individual.fitness)
+print("Backup fitness (cost): ", backup_individual.fitness)
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# A mátrix hibás, a fitness érték minden esetben helyes.
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+latency_of_backup = calculate_fitness(backup_individual.matrix, nodes,
+                                      service_quantity,
+                                      ms_per_service, ms_list)
 
-# latency_of_backup = calculate_fitness(backup_individual.matrix, nodes,
-#                                      service_quantity,
-#                                      ms_per_service, ms_list)
-
-# print("Backup fitness: ", latency_of_backup)
+print("Backup latency: ", latency_of_backup)

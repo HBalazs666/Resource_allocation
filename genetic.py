@@ -389,7 +389,7 @@ def calculate_backup_fitness(matrix_of_individual, nodes, service_num,
     for VM in range(len(matrix_of_individual)):
 
         if sum(allocated_matrix[VM]) != 0 and sum(matrix_of_individual[VM]) != 0:
-            print("A ", VM, "-edik VM nem használható!")
+            # print("A ", VM, "-edik VM nem használható!")
             return 999999999
 
 # -----------------------------------------------------------------
