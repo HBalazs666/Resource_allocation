@@ -8,9 +8,41 @@ from genetic import backup_genetic_algorithm
 from genetic import cost_calculator
 from genetic import calculate_fitness
 
+# szimulációs paraméterek
+# ------------------------------------------------------------
+# genetikus algoritmus paraméterei
+generation_num = 100
+population_size = 200
 
-fog_num = 1
-starting_point = 3  # ehhez a ponthoz csatlakozik a service
+# költségkorlát
+cost_max = 100000 
+
+# hálózat mérete és csatlakozási pont
+fog_num = 2
+starting_point = 3
+
+# inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
+service_quantity = 4  # hány darab legyen
+ms_per_service = 3  # servicenként mennyi ms legyen
+MIPS_ms_min = 1000  # minimum MIPS
+MIPS_ms_max = 1000  # maximum MIPS
+RAM_ms_min = 5
+RAM_ms_max = 5
+
+# inicializáljuk a csomópontokat
+cloud_total_MIPS = [50000, 50000]  # 0
+cloud_total_RAM = [1000000, 1000000]  # 1
+VMs_per_cloud = 4  # 2
+fog_total_MIPS = [10000, 10000]  # 3
+fog_total_RAM = [6000, 6000]  # 4
+VMs_per_fog = 3  # 5
+edge_total_MIPS = [1000, 1000]  # 6
+edge_total_RAM = [10000, 10000]  # 7
+VMs_per_edge = 2  # 8
+cloud_cost_multiplier = 1  # 9
+fog_cost_multiplier = 4  # 10
+edge_cost_multiplier = 8  # 11
+# ------------------------------------------------------------
 
 # itt generáljuk a mintahálózatot
 graph = graph_gen(fog_num)
@@ -20,34 +52,11 @@ graph.print_adj_list()
 network_latencies = dijkstra(graph, fog_num, starting_point)
 print(network_latencies)
 
-# inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
-service_quantity = 4  # hány darab legyen
-ms_per_service = 3  # servicenként mennyi ms legyen TODO: lehetne ez is változó
-MIPS_ms_min = 1000  # minimum MIPS
-MIPS_ms_max = 1000  # maximum MIPS
-RAM_ms_min = 5
-RAM_ms_max = 5
-
 ms_list = init_ms_list(service_quantity, ms_per_service,
                        MIPS_ms_max, MIPS_ms_min, RAM_ms_max,
                        RAM_ms_min)
 
-# inicializáljuk a csomópontokat
 parameters = []
-# -------------------------------------------
-cloud_total_MIPS = [50000, 50000]  # 0
-cloud_total_RAM = [1000000, 1000000]  # 1
-VMs_per_cloud = 8  # 2
-fog_total_MIPS = [10000, 10000]  # 3
-fog_total_RAM = [6000, 6000]  # 4
-VMs_per_fog = 3  # 5
-edge_total_MIPS = [1000, 1000]  # 6
-edge_total_RAM = [10000, 10000]  # 7
-VMs_per_edge = 3  # 8
-cloud_cost_multiplier = 1  # 9
-fog_cost_multiplier = 4  # 10
-edge_cost_multiplier = 8  # 11
-# -------------------------------------------
 parameters.append(cloud_total_MIPS)
 parameters.append(cloud_total_RAM)
 parameters.append(VMs_per_cloud)
@@ -67,20 +76,16 @@ nodes = init_nodes(fog_num, network_latencies, parameters)
 # csak a méretekhez kell
 matrix = init_matrix(nodes, ms_list)
 
-# -------------------------------------------
-generation_num = 600
-population_size = 150
-# -------------------------------------------
 # a legjobb eredmény a megadott paraméterek mellett
 best_individual = genetic_algorithm(matrix, nodes, ms_list,
                                     generation_num,
                                     population_size, service_quantity,
-                                    ms_per_service)
+                                    ms_per_service, cost_max)
 
 cost_of_best = cost_calculator(best_individual.matrix, nodes)
 
 print("Best individual: ",best_individual.matrix)
-print("Fitness: ",best_individual.fitness)
+print("Fitness (latency): ",best_individual.fitness)
 print("Cost: ", cost_of_best)
 
 backup_individual = backup_genetic_algorithm(matrix,
@@ -92,9 +97,10 @@ backup_individual = backup_genetic_algorithm(matrix,
                                              best_individual.matrix)
 
 print("Backup matrix: ", backup_individual.matrix)
-print("Backup cost: ", backup_individual.fitness)
+print("Backup fitness (cost): ", backup_individual.fitness)
 
+cost_max_backup = 9999999
 latency_of_backup = calculate_fitness(backup_individual.matrix, nodes, service_quantity,
-                                      ms_per_service, ms_list)
+                                      ms_per_service, ms_list, cost_max_backup)
 
-print("Backup fitness: ", latency_of_backup)
+print("Backup latency: ", latency_of_backup)

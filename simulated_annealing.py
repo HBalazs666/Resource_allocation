@@ -3,6 +3,7 @@ import math
 import random
 import copy
 from genetic import calculate_fitness
+from genetic import cost_calculator
 from genetic import calculate_backup_fitness
 from classes import Individual
 
@@ -44,9 +45,10 @@ def gen_individual_matrices(best_individual, states_per_iteration):
 
 def simulated_annealing(nodes, ms_list, states_per_iteration,
                         VM_num, ms_num, service_num, ms_num_per_service,
-                        T_0, alpha, k_max):
+                        T_0, alpha, k_max, cost_max):
     
-    init_individual = init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list)
+    init_individual = init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list,
+                              cost_max)
 
     best_individual = init_individual
 
@@ -64,12 +66,14 @@ def simulated_annealing(nodes, ms_list, states_per_iteration,
         #    print("A ",individual,". mátrix: ", individual_matrices[individual], "\n")
             fitness_of_individual = calculate_fitness(individual_matrices[individual],
                                                       nodes, service_num,
-                                                      ms_num_per_service, ms_list)
+                                                      ms_num_per_service, ms_list,
+                                                      cost_max)
         #    print("A ",individual,". mátrix fitnesse: ",fitness_of_individual,"\n")
             created_individual = Individual(individual_matrices[individual], fitness_of_individual)
             individuals.append(created_individual)
 
         for individual in range(len(individuals)):
+            print("A ",individual,". egyed fitnesse: ",individuals[individual].fitness,"\n")
 
             if individuals[individual].fitness < best_individual.fitness:
                 best_individual = copy.deepcopy(individuals[individual])
@@ -77,7 +81,7 @@ def simulated_annealing(nodes, ms_list, states_per_iteration,
                 p = math.exp(-(individuals[individual].fitness - best_individual.fitness) / (T))
                 if random.uniform(0, 1) <= p:
                     best_individual = copy.deepcopy(individuals[individual])
-
+        print("Best individual in k=",k," : ",best_individual.fitness)
     return best_individual
         
 
@@ -86,7 +90,9 @@ def backup_simulated_annealing(nodes, ms_list, states_per_iteration,
                                ms_num_per_service,
                                T_0, alpha, k_max, allocated_matrix):
 
-    init_individual = init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list)
+    cost_max_backup = 9999999
+    init_individual = init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list,
+                              cost_max_backup)
 
     best_individual = init_individual
 

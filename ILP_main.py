@@ -8,9 +8,37 @@ from classes import Graph
 from genetic import node_finder
 from genetic import cost_calculator
 
+# szimulációs paraméterek
+# ------------------------------------------------------------
+# költségkorlát
+cost_max = 50000 
 
-fog_num = 1
-starting_point = 3  # ehhez a ponthoz csatlakozik a service
+# hálózat mérete és csatlakozási pont
+fog_num = 2
+starting_point = 3
+
+# inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
+service_quantity = 4  # hány darab legyen
+ms_per_service = 3  # servicenként mennyi ms legyen
+MIPS_ms_min = 1000  # minimum MIPS
+MIPS_ms_max = 1000  # maximum MIPS
+RAM_ms_min = 5
+RAM_ms_max = 5
+
+# inicializáljuk a csomópontokat
+cloud_total_MIPS = [50000, 50000]  # 0
+cloud_total_RAM = [1000000, 1000000]  # 1
+VMs_per_cloud = 4  # 2
+fog_total_MIPS = [10000, 10000]  # 3
+fog_total_RAM = [6000, 6000]  # 4
+VMs_per_fog = 3  # 5
+edge_total_MIPS = [1000, 1000]  # 6
+edge_total_RAM = [10000, 10000]  # 7
+VMs_per_edge = 2  # 8
+cloud_cost_multiplier = 1  # 9
+fog_cost_multiplier = 4  # 10
+edge_cost_multiplier = 8  # 11
+# ------------------------------------------------------------
 
 # itt generáljuk a mintahálózatot
 graph = graph_gen(fog_num)
@@ -20,34 +48,11 @@ graph.print_adj_list()
 network_latencies = dijkstra(graph, fog_num, starting_point)
 print(network_latencies)
 
-# inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
-service_quantity = 4  # hány darab legyen
-ms_per_service = 3  # servicenként mennyi ms legyen TODO: lehetne ez is változó
-MIPS_ms_min = 1000  # minimum MIPS
-MIPS_ms_max = 1000  # maximum MIPS
-RAM_ms_min = 5
-RAM_ms_max = 5
-
 ms_list = init_ms_list(service_quantity, ms_per_service,
                        MIPS_ms_max, MIPS_ms_min, RAM_ms_max,
                        RAM_ms_min)
 
-# inicializáljuk a csomópontokat
 parameters = []
-# -------------------------------------------
-cloud_total_MIPS = [50000, 50000]  # 0
-cloud_total_RAM = [1000000, 1000000]  # 1
-VMs_per_cloud = 8  # 2
-fog_total_MIPS = [10000, 10000]  # 3
-fog_total_RAM = [6000, 6000]  # 4
-VMs_per_fog = 3  # 5
-edge_total_MIPS = [1000, 1000]  # 6
-edge_total_RAM = [10000, 10000]  # 7
-VMs_per_edge = 3  # 8
-cloud_cost_multiplier = 1  # 9
-fog_cost_multiplier = 4  # 10
-edge_cost_multiplier = 8  # 11
-# -------------------------------------------
 parameters.append(cloud_total_MIPS)
 parameters.append(cloud_total_RAM)
 parameters.append(VMs_per_cloud)
@@ -95,6 +100,16 @@ for VM in range(len(matrix)):
             c3 = opt_model.add_constraint(x_ijk[VM, ms + service*ms_per_service] <= services[VM, service])
 
     c32 = opt_model.add_constraint(sum(services[VM, service] for service in range(service_quantity)) <= 1)
+
+# constraint no.4: A költségkorlátot is tartani kell
+# VM-ek cost-ja:
+cost_per_VM = []
+for VM in range(len(matrix)):
+    containing = node_finder(VM, nodes)
+    cost_per_VM.append(containing.MIPS_per_VM * containing.cost_multiplier)
+
+# jönnek a constraintek
+opt_model.add_constraint(sum(sum(services[VM, service] for service in range(service_quantity)) * cost_per_VM[VM] for VM in range(len(matrix))) <= cost_max)
 
 # célfüggvény
 # VM-ek késleltetésösszegének minimalizálása

@@ -1,5 +1,6 @@
 import random
 import math
+import copy
 from classes import Individual
 
 
@@ -7,7 +8,7 @@ from classes import Individual
 # ha a matrix_of_individual = matrix operációt alkalmazzuk,
 # az hibás működést eredményez, mert megváltoztatja a matrix-ot is
 def init_first(matrix, population_size, nodes, service_num,
-               ms_num_per_service, ms_list):
+               ms_num_per_service, ms_list, cost_max):
 
     init_population = []
 
@@ -27,7 +28,8 @@ def init_first(matrix, population_size, nodes, service_num,
 
         latency_of_individual = calculate_fitness(matrix_of_individual,
                                                   nodes, service_num,
-                                                  ms_num_per_service, ms_list)
+                                                  ms_num_per_service, ms_list,
+                                                  cost_max)
 
         generated_individual = Individual(matrix_of_individual, latency_of_individual)
 
@@ -64,7 +66,7 @@ def latency_calculator(ms, containing_node):
 
 # kiszámoljuk egy egyed fittségét
 def calculate_fitness(matrix_of_individual, nodes, service_num,
-                      ms_num_per_service, ms_list):
+                      ms_num_per_service, ms_list, cost_max):
 
     # egy VM-en különböző servicekhez tartozó
     # MS-ek nem lehetnek
@@ -113,6 +115,11 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
             print("Egy MS több VM-en is fut, vagy egy MS nem lett sehol sem allokálva. Total: ", total)
             print("Ez a hibás mátrix: ", matrix_of_individual)
             return 999999999
+
+    # a költségkorlátnak is teljesülnie kell
+    cost = cost_calculator(matrix_of_individual, nodes)
+    if cost > cost_max:
+        return 6666666666
 
 
     # ha nincs ütközés a kikötések mentén, akkor normál módon
@@ -171,18 +178,20 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
                     
 
 # kiválasztjuk a legjobb egyedeket az implementált szabály alapján
-def select(generation, nodes, service_num, ms_num_per_service, ms_list):
+def select(generation, nodes, service_num, ms_num_per_service, ms_list,
+           cost_max):
 
     for individual in generation:
 
         individual.fitness = calculate_fitness(individual.matrix, nodes,
                                                service_num,
-                                               ms_num_per_service, ms_list)
+                                               ms_num_per_service, ms_list,
+                                               cost_max)
 
     # latency szerint növekvő sorrendbe rakjuk az egyedeket
     generation.sort(key=lambda x: x.fitness, reverse=False)
 
-    # a felső 20%-ot választjuk ki keresztezésre
+    # a felső 4-et választjuk ki keresztezésre
     selected_individuals = generation[:4]
 
     return selected_individuals
@@ -285,13 +294,13 @@ def mutation(population):
 
 
 def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
-                      service_num, ms_num_per_service):
+                      service_num, ms_num_per_service, cost_max):
 
     first_generation = init_first(matrix, population_size, nodes, service_num,
-                                  ms_num_per_service, ms_list)
+                                  ms_num_per_service, ms_list, cost_max)
 
     best_individuals = select(first_generation, nodes, service_num,
-                              ms_num_per_service, ms_list)
+                              ms_num_per_service, ms_list, cost_max)
 
     best = best_individuals[0]
 
@@ -300,19 +309,30 @@ def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
         new_generation = crossover(best_individuals, population_size)
         mutated_generation = mutation(new_generation)
         best_individuals = select(mutated_generation, nodes, service_num,
-                                  ms_num_per_service, ms_list)
+                                  ms_num_per_service, ms_list, cost_max)
+        print("Actual best fitness: ", best.fitness,"\n")
+        print("Best individual_0 fitness: ", best_individuals[0].fitness,"\n")
 
-        if best_individuals[0].fitness < best.fitness:
-            best = best_individuals[0]
-    
+        cost_best_individuals_0 = cost_calculator(best_individuals[0].matrix, nodes)
+        cost_best = cost_calculator(best.matrix, nodes)
+
+        print("Best individual_0 cost: ",cost_best_individuals_0,"\n\n")
+
+        if (best_individuals[0].fitness < best.fitness):
+            best = copy.deepcopy(best_individuals[0])
+        # ez jelentősen javítja az algoritmust
+        elif best_individuals[0].fitness == 6666666666 and cost_best_individuals_0 < cost_best:
+            best = copy.deepcopy(best_individuals[0])
+
     return best
 
 
 def backup_genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
-                             service_num, ms_num_per_service, allocated_matrix):
+                             service_num, ms_num_per_service, allocated_matrix,
+                             cost_max=9999999):
 
     first_generation = init_first(matrix, population_size, nodes, service_num,
-                                  ms_num_per_service, ms_list)
+                                  ms_num_per_service, ms_list, cost_max)
 
     best_individuals = backup_select(first_generation, nodes, service_num,
                                      ms_num_per_service, ms_list, allocated_matrix)
@@ -332,7 +352,7 @@ def backup_genetic_algorithm(matrix, nodes, ms_list, generation_num, population_
     return best
 
 
-# itt költségre minimalizálunk
+# backupok fitnessfüggvénye (cost)
 def calculate_backup_fitness(matrix_of_individual, nodes, service_num,
                              ms_num_per_service, ms_list, allocated_matrix):
 
@@ -419,7 +439,7 @@ def calculate_backup_fitness(matrix_of_individual, nodes, service_num,
     return cost
 
 
-# költségszámítás nem backupoknak
+# költségszámítás (cost) általános, nem vizsgál constrainteket
 def cost_calculator(matrix, nodes):
 
     cost = 0

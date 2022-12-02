@@ -99,7 +99,8 @@ def init_matrix(nodes, ms_list):
 # SA algoritmus függvényei ------------------------------------------------------
 
 
-def init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list):
+def init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list,
+            cost_max):
 
     # kezdeti állapot létrehozása
 
@@ -116,7 +117,7 @@ def init_sa(VM_num, ms_num, nodes, service_num, ms_num_per_service, ms_list):
         matrix_of_individual[ms_placement][MS] = 1
 
     init_fitness = calculate_fitness(matrix_of_individual, nodes, service_num,
-                                     ms_num_per_service, ms_list)
+                                     ms_num_per_service, ms_list, cost_max)
 
     init_individual = Individual(matrix_of_individual, init_fitness)
 
