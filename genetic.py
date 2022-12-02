@@ -460,3 +460,11 @@ def cost_calculator(matrix, nodes):
             cost = cost + node.MIPS_per_VM * node.cost_multiplier
 
     return cost
+
+
+# index alapján megtalálja, hogy az ms melyik service-hez tartozik
+def service_finder(index, ms_per_service):
+
+    service = int(index/ms_per_service)
+
+    return service
