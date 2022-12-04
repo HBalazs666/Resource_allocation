@@ -73,15 +73,15 @@ def simulated_annealing(nodes, ms_list, states_per_iteration,
             individuals.append(created_individual)
 
         for individual in range(len(individuals)):
-            print("A ",individual,". egyed fitnesse: ",individuals[individual].fitness,"\n")
-
+            #print("A ",individual,". egyed fitnesse: ",individuals[individual].fitness,"\n")
+            
             if individuals[individual].fitness < best_individual.fitness:
                 best_individual = copy.deepcopy(individuals[individual])
             else:
                 p = math.exp(-(individuals[individual].fitness - best_individual.fitness) / (T))
                 if random.uniform(0, 1) <= p:
                     best_individual = copy.deepcopy(individuals[individual])
-        print("Best individual in k=",k," : ",best_individual.fitness)
+        #print("Best individual in k=",k," : ",best_individual.fitness)
     return best_individual
         
 
