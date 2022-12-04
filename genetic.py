@@ -100,7 +100,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
                 VM_RAM_assumed = VM_RAM_assumed + ms_list[ms].RAM_req
 
         if VM_RAM_assumed > node.RAM_per_VM:
-            print("A VM RAM kapacitása nem elegendő!")
+            #print("A VM RAM kapacitása nem elegendő!")
             return 999999999
 
     # egy ms csak egy VM-en lehet egyszerre
@@ -119,7 +119,7 @@ def calculate_fitness(matrix_of_individual, nodes, service_num,
     # a költségkorlátnak is teljesülnie kell
     cost = cost_calculator(matrix_of_individual, nodes)
     if cost > cost_max:
-        return 6666666666
+        return 6666666
 
 
     # ha nincs ütközés a kikötések mentén, akkor normál módon
@@ -271,7 +271,7 @@ def crossover(selected_individuals, population_size):
 # szabály: i/ms_num eséllyel tesszünk át egy ms-t egy másik VM-re
 # az új VM random
 # TODO: ezt is parametrizáljuk
-def mutation(population):
+def mutation(population, mutation_coefficient):
     
     p = 1/len(population[0].matrix[0])  # TODO: ezzel kísérletezni
 
@@ -294,7 +294,8 @@ def mutation(population):
 
 
 def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
-                      service_num, ms_num_per_service, cost_max):
+                      service_num, ms_num_per_service, cost_max,
+                      mutation_coefficient):
 
     first_generation = init_first(matrix, population_size, nodes, service_num,
                                   ms_num_per_service, ms_list, cost_max)
@@ -307,21 +308,21 @@ def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
     for generation in range(generation_num):
 
         new_generation = crossover(best_individuals, population_size)
-        mutated_generation = mutation(new_generation)
+        mutated_generation = mutation(new_generation, mutation_coefficient)
         best_individuals = select(mutated_generation, nodes, service_num,
                                   ms_num_per_service, ms_list, cost_max)
-        print("Actual best fitness: ", best.fitness,"\n")
-        print("Best individual_0 fitness: ", best_individuals[0].fitness,"\n")
+        #print("Actual best fitness: ", best.fitness,"\n")
+        #print("Best individual_0 fitness: ", best_individuals[0].fitness,"\n")
 
         cost_best_individuals_0 = cost_calculator(best_individuals[0].matrix, nodes)
         cost_best = cost_calculator(best.matrix, nodes)
 
-        print("Best individual_0 cost: ",cost_best_individuals_0,"\n\n")
+        #print("Best individual_0 cost: ",cost_best_individuals_0,"\n\n")
 
         if (best_individuals[0].fitness < best.fitness):
             best = copy.deepcopy(best_individuals[0])
         # ez jelentősen javítja az algoritmust
-        elif best_individuals[0].fitness == 6666666666 and cost_best_individuals_0 < cost_best:
+        elif best_individuals[0].fitness == 6666666 and cost_best_individuals_0 < cost_best:
             best = copy.deepcopy(best_individuals[0])
 
     return best
@@ -329,7 +330,7 @@ def genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
 
 def backup_genetic_algorithm(matrix, nodes, ms_list, generation_num, population_size,
                              service_num, ms_num_per_service, allocated_matrix,
-                             cost_max=9999999):
+                             cost_max=999999):
 
     first_generation = init_first(matrix, population_size, nodes, service_num,
                                   ms_num_per_service, ms_list, cost_max)

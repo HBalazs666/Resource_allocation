@@ -11,30 +11,30 @@ from genetic import cost_calculator
 # szimulációs paraméterek
 # ------------------------------------------------------------
 # költségkorlát
-cost_max = 50000 
+cost_max = 99999999999 
 
 # hálózat mérete és csatlakozási pont
-fog_num = 2
+fog_num = 30
 starting_point = 3
 
 # inicializáljuk a serviceket (ms-ek létrehozásável) (nem irányított MS)
-service_quantity = 4  # hány darab legyen
-ms_per_service = 3  # servicenként mennyi ms legyen
-MIPS_ms_min = 1000  # minimum MIPS
-MIPS_ms_max = 1000  # maximum MIPS
-RAM_ms_min = 5
-RAM_ms_max = 5
+service_quantity = 50  # hány darab legyen
+ms_per_service = 50  # servicenként mennyi ms legyen
+MIPS_ms_min = 150  # minimum MIPS
+MIPS_ms_max = 150  # maximum MIPS
+RAM_ms_min = 516
+RAM_ms_max = 1024
 
 # inicializáljuk a csomópontokat
-cloud_total_MIPS = [50000, 50000]  # 0
-cloud_total_RAM = [1000000, 1000000]  # 1
-VMs_per_cloud = 4  # 2
-fog_total_MIPS = [10000, 10000]  # 3
-fog_total_RAM = [6000, 6000]  # 4
-VMs_per_fog = 3  # 5
-edge_total_MIPS = [1000, 1000]  # 6
-edge_total_RAM = [10000, 10000]  # 7
-VMs_per_edge = 2  # 8
+cloud_total_MIPS = [30000, 30000]  # 0
+cloud_total_RAM = [40960, 40960]  # 1
+VMs_per_cloud = 5  # 2
+fog_total_MIPS = [15000, 15000]  # 3
+fog_total_RAM = [8192, 8192]  # 4
+VMs_per_fog = 5  # 5
+edge_total_MIPS = [7500, 7500]  # 6
+edge_total_RAM = [6144, 6144]  # 7
+VMs_per_edge = 5  # 8
 cloud_cost_multiplier = 1  # 9
 fog_cost_multiplier = 4  # 10
 edge_cost_multiplier = 8  # 11
